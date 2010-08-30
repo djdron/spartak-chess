@@ -8,7 +8,7 @@ LD        = mipsel-linux-ld
 ELF2APP   = $(DINGOO_SDK)/tools/elf2app/elf2app 
 BIN2H     = $(DINGOO_SDK)/tools/bin2h/bin2h 
 
-PROJECT_NAME = chess
+PROJECT_NAME = spartak-chess
 LD_SCRIPT = $(DINGOO_SDK)/lib/dingoo.xn
 
 SRC_PATH = .
