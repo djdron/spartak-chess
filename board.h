@@ -43,17 +43,22 @@ public:
 
 	enum eCellView { CELL_NORMAL, CELL_LIGHT, CELL_DARK };
 	void DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, char piece);
+	bool Flash() const { return flash; }
+
+	void Flip(bool _flip) { flip = _flip; changed = true; }
+	bool Flip() const { return flip; }
+
 	eBufferRGBA chess_pieces;
 	eBufferRGBA chess_board;
-	bool Flash() const { return flash; }
 
 protected:
 	eBuffer<char> position;
-	char cursor[3];
-	char selected[3];
-	bool changed;
-	int frame;
-	bool flash;
+	char	cursor[3];
+	char	selected[3];
+	int		frame;
+	bool	changed;
+	bool	flash;
+	bool	flip;
 };
 
 #endif//__BOARD_H__

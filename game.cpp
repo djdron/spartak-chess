@@ -54,6 +54,7 @@ void eGame::New()
 	game_state = GS_NONE;
 	ApplyCell(NULL);
 	board->Cursor("e3");
+	board->Flip(false);
 	UCI_Command uci;
 	uci.Execute("ucinewgame");
 //	uci.Execute("position fen k7/7P/8/8/8/8/6p1/K w -");

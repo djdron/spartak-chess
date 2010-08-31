@@ -127,6 +127,7 @@ static void OnKeyUp(byte _key, int x, int y)
 	case '\r':	game->Command('a'); 	break;
 	case 27:	game->Command('b'); 	break;//esc
 	case '\\':	game->Command('g'); 	break;
+	case ' ':	game->Command('f'); 	break;
 	}
 }
 static void OnKeySpecialDown(int _key, int x, int y)
