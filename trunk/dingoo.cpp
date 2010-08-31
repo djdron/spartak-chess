@@ -82,7 +82,7 @@ bool UpdateKeys()
 	if((ks.status&K_BUTTON_START) && (ks.status&K_BUTTON_SELECT))
 		return false;
 
-	static bool keys[] = { false, false, false, false, false, false, false, false };
+	static bool keys[] = { false, false, false, false, false, false, false, false, false };
 	if(CheckKey(ks, K_DPAD_LEFT, &keys[0]))
 		game->Command('l');
 	if(CheckKey(ks, K_DPAD_RIGHT, &keys[1]))
@@ -99,6 +99,8 @@ bool UpdateKeys()
 		game->Command('n');
 	if(CheckKey(ks, K_TRIGGER_RIGHT, &keys[7]))
 		game->Command('g');
+	if(CheckKey(ks, K_BUTTON_SELECT, &keys[8]))
+		game->Command('f');
 	return true;
 }
 inline word BGR565(byte r, byte g, byte b) { return (((r&~7) << 8)|((g&~3) << 3)|(b >> 3)); }

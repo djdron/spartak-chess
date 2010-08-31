@@ -24,7 +24,7 @@ eBoard::eBoard()
 	: chess_pieces(ePoint2(PIECES_W, PIECES_H))
 	, chess_board(ePoint2(BOARD_W, BOARD_H))
 	, position(ePoint2(BOARD_DIM, BOARD_DIM))
-	, changed(true), frame(0), flash(false)
+	, frame(0), changed(true), flash(false), flip(false)
 {
 	Position("");
 	Cursor("");
@@ -153,23 +153,30 @@ void eBoard::Paint(eBufferRGBA& buf)
 
 	for(int i = 0; i < BOARD_DIM; ++i)
 	{
-		font->DrawChar(buf, ePoint2(16 + 9 + i*eBoard::PIECE_SIZE, 0), 'a' + i);
-		font->DrawChar(buf, ePoint2(16 + 9 + i*eBoard::PIECE_SIZE, eBoard::PIECE_SIZE*eBoard::BOARD_DIM + eFont::CHAR_H), 'a' + i);
+		char col = flip ? 'h' - i : 'a' + i;
+		font->DrawChar(buf, ePoint2(16 + 9 + i*PIECE_SIZE, 0), col);
+		font->DrawChar(buf, ePoint2(16 + 9 + i*PIECE_SIZE, PIECE_SIZE*BOARD_DIM + eFont::CHAR_H), col);
 
-		font->DrawChar(buf, ePoint2(4, 16 + 5 + i*eBoard::PIECE_SIZE), '1' + eBoard::BOARD_DIM - i - 1);
-		font->DrawChar(buf, ePoint2(16 + 2 + eBoard::PIECE_SIZE*eBoard::BOARD_DIM, 16 + 5 + i*eBoard::PIECE_SIZE), '1' + eBoard::BOARD_DIM - i - 1);
+		char row = flip ? '1' + i : '1' + BOARD_DIM - i - 1;
+		font->DrawChar(buf, ePoint2(4, 16 + 5 + i*PIECE_SIZE), row);
+		font->DrawChar(buf, ePoint2(16 + 2 + PIECE_SIZE*BOARD_DIM, 16 + 5 + i*PIECE_SIZE), row);
 	}
 
 	for(int j = 0; j < BOARD_DIM; ++j)
 	{
 		for(int i = 0; i < BOARD_DIM; ++i)
 		{
-			char p = position[ePoint2(i, j)];
+			ePoint2 cell = flip ? ePoint2(BOARD_DIM - i - 1, BOARD_DIM - j - 1) : ePoint2(i, j);
+			char cell_str[3];
+			cell_str[0] = 'a' + cell.x;
+			cell_str[1] = '8' - cell.y;
+			cell_str[2] = '\0';
+			char p = position[cell];
 			bool black = (i + j) % 2 != 0;
 			eCellView view = CELL_NORMAL;
-			if(selected[0] == 'a' + i && selected[1] == '1' + (BOARD_DIM - j - 1))
+			if(!strcmp(cell_str, selected))
 				view = CELL_LIGHT;
-			if(cursor[0] == 'a' + i && cursor[1] == '1' + (BOARD_DIM - j - 1))
+			if(!strcmp(cell_str, cursor))
 				view = flash ? CELL_LIGHT : CELL_DARK;
 			DrawCell(buf, ePoint2(16 + i*PIECE_SIZE, 16 + j*PIECE_SIZE), black, view, p);
 		}
@@ -188,38 +195,51 @@ bool eBoard::Command(char cmd)
 			strcpy(pos, Cursor());
 			if(!pos[0])
 				return true;
+			if(flip)
+			{
+				switch(cmd)
+				{
+				case 'l':	cmd = 'r';	break;
+				case 'r':	cmd = 'l';	break;
+				case 'u':	cmd = 'd';	break;
+				case 'd':	cmd = 'u';	break;
+				}
+			}
 			switch(cmd)
 			{
 			case 'l':
 				if(pos[0] != 'a')
-				{
 					--pos[0];
-					Cursor(pos);
-				}
+				else
+					pos[0] = 'h';
+				Cursor(pos);
 				break;
 			case 'r':
 				if(pos[0] != 'h')
-				{
 					++pos[0];
-					Cursor(pos);
-				}
+				else
+					pos[0] = 'a';
+				Cursor(pos);
 				break;
 			case 'u':
 				if(pos[1] != '8')
-				{
 					++pos[1];
-					Cursor(pos);
-				}
+				else
+					pos[1] = '1';
+				Cursor(pos);
 				break;
 			case 'd':
 				if(pos[1] != '1')
-				{
 					--pos[1];
-					Cursor(pos);
-				}
+				else
+					pos[1] = '8';
+				Cursor(pos);
 				break;
 			}
 		}
+		return true;
+	case 'f':
+		Flip(!flip);
 		return true;
 	}
 	return false;
