@@ -17,7 +17,7 @@ DIST_PATH = $(OBJ_BASE)
 OBJ_PATH = $(OBJ_BASE)
 RES_PATH = res
 
-SRCFOLDERS = . stockfish
+SRCFOLDERS = . stockfish ui
 LIB_PATH  = $(DINGOO_SDK)/lib
 LIBS      = -lpng -lc -lm -lz -ljz4740 -lgcc -lstdc++
 

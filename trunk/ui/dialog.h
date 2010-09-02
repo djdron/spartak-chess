@@ -52,10 +52,12 @@ public:
 	eDesktop();
 	virtual ~eDesktop();
 	void 	Update();
+	void	Clear() { buffer.Clear(); }
 	eRGBA*	Buffer() const { return buffer.Data(); }
 	eDialog* Focus() const { return focus; }
 	void	Focus(eDialog* f) { focus = f; }
 	bool	Command(char cmd) { if(!focus) return false; return focus->Command(cmd); }
+
 protected:
 	eDialog* focus;
 	eBufferRGBA	buffer;

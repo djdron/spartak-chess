@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __UI_H__
 #define __UI_H__
 
-#include "std_types.h"
+#include "../std_types.h"
 
 #pragma once
 
