@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui.h"
 #include <png.h>
 #include <string>
-#include "io.h"
+#include "../io.h"
 
 bool ReadPNG(const char* name, void* buffer, dword w, dword h, byte channels)
 {

@@ -20,34 +20,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "stockfish/uci.h"
 #include <string.h>
 #include "game.h"
-#include "board.h"
+#include "ui/board.h"
+#include "ui/picture.h"
 
 eDialog* PieceSelector(bool side, eBoard* board);
 
-eGame::eGame() : piece_selector(NULL), game_status(NULL)
+eGame::eGame()
+	: desktop(NULL), board(NULL), piece_selector(NULL), game_status(NULL), splash(NULL)
+	, move_side(false), game_state(GS_NONE), state(S_NONE), start_time(0)
 {
 	desktop = new eDesktop;
 	desktop->Create();
+}
+
+eGame::~eGame()
+{
+	Done();
+}
+
+void eGame::Init()
+{
 	board = new eBoard;
 	board->Create();
-	desktop->Insert(board);
-	desktop->Focus(board);
 	game_status = new eDialog;
 	game_status->Create();
-	desktop->Insert(game_status);
 	game_status->bound.beg = ePoint2(240, 0);
 	game_status->bound.end = ePoint2(319, 16);
 	Application::initialize();
 	New();
 }
-
-eGame::~eGame()
+void eGame::Done()
 {
-	Application::free_resources();
+	if(state > S_SPLASH)
+		Application::free_resources();
 	desktop->Destroy();
 	delete desktop;
+	desktop = NULL;
 }
-
 void eGame::New()
 {
 	move_side = false;
@@ -251,4 +260,41 @@ bool eGame::Command(char cmd)
 		return true;
 	}
 	return false;
+}
+void eGame::Update()
+{
+	switch(state)
+	{
+	case S_NONE:
+		splash = new ePicture("res/splash.png", ePoint2(320, 240));
+		splash->Create();
+		desktop->Insert(splash);
+		state = S_SPLASH0;
+		break;
+	case S_SPLASH0:
+		state = S_SPLASH;
+		break;
+	case S_SPLASH:
+		start_time = clock();
+		Init();
+		state = S_INIT;
+		break;
+	case S_INIT:
+		if((clock() - start_time)/(CLOCKS_PER_SEC/1000) > 1000)
+		{
+			desktop->Remove(splash);
+			splash->Destroy();
+			delete splash;
+			splash = NULL;
+			desktop->Clear();
+			desktop->Insert(board);
+			desktop->Focus(board);
+			desktop->Insert(game_status);
+			state = S_GAME;
+		}
+		break;
+	case S_GAME:
+		break;
+	}
+	desktop->Update();
 }

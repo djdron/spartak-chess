@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include "std_types.h"
-#include "dialog.h"
+#include "ui/dialog.h"
 #include "game.h"
 #include "io.h"
 
@@ -108,7 +108,7 @@ static void OnResizeWindow(int Width, int Height)
 
 static void OnDraw()
 {
-	game->Desktop().Update();
+	game->Update();
 	DrawGL(w, h);
 	glutSwapBuffers();
 }

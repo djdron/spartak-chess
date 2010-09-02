@@ -25,10 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <dingoo/keyboard.h>
 #include <dingoo/slcd.h>
 #include <dingoo/cache.h>
-#include "ui.h"
 #include "game.h"
 #include "io.h"
-#include "dialog.h"
+#include "ui/dialog.h"
 
 #define USE_DINGOO_THREAD // use separate thread because we need more stack than default in .app (64K)
 
@@ -125,7 +124,7 @@ void thread_proc(void* arg)
 	game = new eGame;
 	while(UpdateKeys())
 	{
-		game->Desktop().Update();
+		game->Update();
 		UpdateScreen();
 //		mdelay(20);
 	}
