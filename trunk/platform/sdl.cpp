@@ -30,6 +30,8 @@ static bool Init()
 {
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
         return false;
+	SDL_ShowCursor(SDL_DISABLE);
+	SDL_WM_SetCaption("Spartak Chess (Stockfish)", NULL);
     sdl_inited = true;
     screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
     if(!screen)

@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE);
 	glutInitWindowSize(320, 240);
 	glutInitWindowPosition(100, 100);
-	window = glutCreateWindow("Dingoo chess (stockfish)");
+	window = glutCreateWindow("Spartak Chess (Stockfish)");
 	glutDisplayFunc(OnDraw);
 //	glutFullScreen();
 	glutIdleFunc(OnIdle);
