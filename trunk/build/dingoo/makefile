@@ -22,7 +22,7 @@ LIB_PATH  = $(DINGOO_SDK)/lib
 LIBS      = -lpng -lc -lm -lz -ljz4740 -lgcc -lstdc++
 
 INCLUDE   = -I$(DINGOO_SDK)/include -I$(DINGOO_SDK)/include/png -I$(DINGOO_SDK)/include/zlib -I$(DINGOO_SDK)/include/stlport -I$(MIPSTOOLS)/mipsel-linux/include -I. -I$
-STD_OPTS  = -G0 -O3 $(INCLUDE) -Wall -finline-functions -fomit-frame-pointer -msoft-float -fno-builtin -fno-exceptions -mips32 -mno-abicalls -fno-pic -c -DMPU_JZ4740 -DNDEBUG -DUSE_DINGOO -D_DINGOO -DNO_PREFETCH -DNO_THREADS
+STD_OPTS  = -G0 -O3 $(INCLUDE) -Wall -finline-functions -fomit-frame-pointer -msoft-float -fno-builtin -fno-exceptions -mips32 -mno-abicalls -fno-pic -c -DMPU_JZ4740 -DNDEBUG -D_DINGOO -DNO_PREFETCH -DNO_THREADS
 CPP_OPTS  = $(STD_OPTS) -fno-rtti -fno-threadsafe-statics
 C_OPTS    = $(STD_OPTS)
 LD_OPTS   = -nodefaultlibs --script $(LD_SCRIPT) -L$(LIB_PATH) $(LIBS)
