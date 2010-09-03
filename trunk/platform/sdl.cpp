@@ -67,6 +67,7 @@ static void UpdateScreen(eGame* game)
 			eRGBA c(*data++);
 			*scr++ = BGR565(c.r, c.g, c.b);
 		}
+		scr += offscreen->pitch - 320*2;
 	}
 	SDL_UnlockSurface(offscreen);
 	SDL_BlitSurface(offscreen, NULL, screen, NULL);
