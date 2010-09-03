@@ -11,13 +11,13 @@ BIN2H     = $(DINGOO_SDK)/tools/bin2h/bin2h
 PROJECT_NAME = spartak-chess
 LD_SCRIPT = $(DINGOO_SDK)/lib/dingoo.xn
 
-SRC_PATH = .
+SRC_PATH = ../..
 OBJ_BASE = Release
 DIST_PATH = $(OBJ_BASE)
 OBJ_PATH = $(OBJ_BASE)
 RES_PATH = res
 
-SRCFOLDERS = . stockfish ui
+SRCFOLDERS = . stockfish ui platform
 LIB_PATH  = $(DINGOO_SDK)/lib
 LIBS      = -lpng -lc -lm -lz -ljz4740 -lgcc -lstdc++
 
