@@ -79,7 +79,7 @@ namespace {
 
     o["Use Search Log"] = Option(false);
     o["Search Log Filename"] = Option("SearchLog.txt");
-    o["Book File"] = Option("res/book/stockfish.bin");
+    o["Book File"] = Option("res/book/performance.bin");
     o["Best Book Move"] = Option(false);
     o["Mobility (Middle Game)"] = Option(100, 0, 200);
     o["Mobility (Endgame)"] = Option(100, 0, 200);
