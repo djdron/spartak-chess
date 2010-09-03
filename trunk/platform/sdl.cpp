@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
     	game->Update();
     	UpdateScreen(game);
     }
+    delete game;
     Done();
     return 0;
 }
