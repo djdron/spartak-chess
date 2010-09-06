@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <assert.h>
 
+namespace xUi
+{
+
 eBoard::eBoard()
 	: chess_pieces(ePoint2(PIECES_W, PIECES_H))
 	, chess_board(ePoint2(BOARD_W, BOARD_H))
@@ -73,10 +76,6 @@ void eBoard::Cursor(const char* pos)
 	changed = true;
 	frame = 0;
 	flash = false;
-}
-const char* eBoard::Cursor()
-{
-	return cursor;
 }
 void eBoard::Selected(const char* pos)
 {
@@ -238,9 +237,9 @@ bool eBoard::Command(char cmd)
 			}
 		}
 		return true;
-	case 'f':
-		Flip(!flip);
-		return true;
 	}
 	return false;
 }
+
+}
+//namespace xUi

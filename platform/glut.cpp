@@ -108,18 +108,20 @@ static void OnResizeWindow(int Width, int Height)
 
 static void OnDraw()
 {
-	game->Update();
-	DrawGL(w, h);
-	glutSwapBuffers();
+	if(game->Update())
+	{
+		DrawGL(w, h);
+		glutSwapBuffers();
+	}
+	else
+		exit(0);
 }
-static void OnIdle()
+static void OnIdle(int timer)
 {
 	glutPostRedisplay();
+	glutTimerFunc(15, OnIdle, 0);
 }
 static void OnKeyDown(byte _key, int x, int y)
-{
-}
-static void OnKeyUp(byte _key, int x, int y)
 {
 	switch(_key)
 	{
@@ -130,10 +132,10 @@ static void OnKeyUp(byte _key, int x, int y)
 	case ' ':	game->Command('f'); 	break;
 	}
 }
-static void OnKeySpecialDown(int _key, int x, int y)
+static void OnKeyUp(byte _key, int x, int y)
 {
 }
-static void OnKeySpecialUp(int _key, int x, int y)
+static void OnKeySpecialDown(int _key, int x, int y)
 {
 	switch(_key)
 	{
@@ -142,6 +144,9 @@ static void OnKeySpecialUp(int _key, int x, int y)
 	case GLUT_KEY_UP:		game->Command('u');		break;
 	case GLUT_KEY_DOWN:		game->Command('d');		break;
 	}
+}
+static void OnKeySpecialUp(int _key, int x, int y)
+{
 }
 
 static void Done()
@@ -161,7 +166,7 @@ int main(int argc, char* argv[])
 	window = glutCreateWindow("Spartak Chess (Stockfish)");
 	glutDisplayFunc(OnDraw);
 //	glutFullScreen();
-	glutIdleFunc(OnIdle);
+	glutTimerFunc(15, OnIdle, 0);
 	glutReshapeFunc(OnResizeWindow);
 	glutIgnoreKeyRepeat(true);
 	glutKeyboardFunc(OnKeyDown);

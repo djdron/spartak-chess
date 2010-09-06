@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "dialog.h"
 #include <algorithm>
 
+namespace xUi
+{
+
 eFont* eDialog::font = NULL;
 
 void eDialog::Destroy()
@@ -58,5 +61,9 @@ eDesktop::~eDesktop()
 }
 void eDesktop::Update()
 {
+	buffer.Clear();
 	Paint(buffer);
 }
+
+}
+//namespace xUi

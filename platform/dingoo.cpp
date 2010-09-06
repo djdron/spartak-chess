@@ -123,9 +123,8 @@ void UpdateScreen()
 void thread_proc(void* arg)
 {
 	game = new eGame;
-	while(UpdateKeys())
+	while(UpdateKeys() && game->Update())
 	{
-		game->Update();
 		UpdateScreen();
 //		mdelay(20);
 	}

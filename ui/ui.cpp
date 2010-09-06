@@ -21,6 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include "../io.h"
 
+namespace xUi
+{
+
 bool ReadPNG(const char* name, void* buffer, dword w, dword h, byte channels)
 {
 	FILE* f = fopen(xIo::Resource(name), "rb");
@@ -80,7 +83,7 @@ eFont::eFont() : buffer(ePoint2(FONT_W, FONT_H))
 {
 	ReadPNG("res/font_monospace_14.png", buffer.Data(), FONT_W, FONT_H, 1);
 }
-void eFont::DrawChar(eBufferRGBA& buf, const ePoint2& pos, char ch)
+void eFont::DrawChar(eBufferRGBA& buf, const ePoint2& pos, char ch, const eRGBA& color)
 {
 	ePoint2 symbol_pos(0, 0);
 	if(ch >= 'A' && ch <= 'Z')
@@ -105,18 +108,24 @@ void eFont::DrawChar(eBufferRGBA& buf, const ePoint2& pos, char ch)
 	{
 		for(int y = 0; y < CHAR_H; ++y)
 		{
-			byte l = buffer[symbol_pos + ePoint2(x, y)];
-			buf[pos + ePoint2(x, y)] = eRGBA(l, l, l, 0);
+			eRGBA c0(color);
+			c0.a = buffer[symbol_pos + ePoint2(x, y)];
+			eRGBA c = buf[pos + ePoint2(x, y)];
+			c = c + c0;
+			buf[pos + ePoint2(x, y)] = c;
 		}
 	}
 }
-void eFont::DrawText(eBufferRGBA& buf, const ePoint2& _pos, const char* text)
+void eFont::DrawText(eBufferRGBA& buf, const ePoint2& _pos, const char* text, const eRGBA& color)
 {
 	ePoint2 pos(_pos);
 	while(*text)
 	{
-		DrawChar(buf, pos, *text);
+		DrawChar(buf, pos, *text, color);
 		++text;
 		pos.x += CHAR_W;
 	}
 }
+
+}
+//namespace xUi

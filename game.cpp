@@ -21,15 +21,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include "game.h"
 #include "ui/board.h"
-#include "ui/picture.h"
 
+namespace xUi
+{
 eDialog* PieceSelector(bool side, eBoard* board);
+eDialog* Menu();
+void MenuUpdateItem(eDialog* m, const std::string& text, const std::string& id);
+}
+//namespace xUi
 
 eGame::eGame()
-	: desktop(NULL), board(NULL), piece_selector(NULL), game_status(NULL), splash(NULL)
-	, move_side(false), game_state(GS_NONE), state(S_NONE), start_time(0)
+	: desktop(NULL), board(NULL), piece_selector(NULL), game_status(NULL), splash(NULL), menu(NULL)
+	, move_side(false), game_state(GS_NONE), state(S_NONE), start_time(0), difficulty(D_EASY)
+	, move_count(0)
 {
-	desktop = new eDesktop;
+	desktop = new xUi::eDesktop;
 	desktop->Create();
 }
 
@@ -40,9 +46,9 @@ eGame::~eGame()
 
 void eGame::Init()
 {
-	board = new eBoard;
+	board = new xUi::eBoard;
 	board->Create();
-	game_status = new eDialog;
+	game_status = new xUi::eDialog;
 	game_status->Create();
 	game_status->bound.beg = ePoint2(240, 0);
 	game_status->bound.end = ePoint2(319, 16);
@@ -57,17 +63,20 @@ void eGame::Done()
 	delete desktop;
 	desktop = NULL;
 }
-void eGame::New()
+void eGame::New(bool side)
 {
 	move_side = false;
+	move_count = 0;
 	game_state = GS_NONE;
 	ApplyCell(NULL);
-	board->Cursor("e3");
-	board->Flip(false);
+	board->Cursor(side ? "d6" : "e3");
+	board->Flip(side);
 	UCI_Command uci;
 	uci.Execute("ucinewgame");
 //	uci.Execute("position fen k7/7P/8/8/8/8/6p1/K w -");
 //	move_side = true;
+	if(side)
+		Move(NULL);
 	UpdateBoardPosition();
 }
 bool eGame::Move(const char* move)
@@ -78,7 +87,17 @@ bool eGame::Move(const char* move)
 	UCI_Command uci;
 	if(!move)
 	{
-		string r = uci.Execute("go");
+		std::string go = "go";
+		if(move_count > 10)
+		{
+			switch(difficulty)
+			{
+			case D_EASY:	go += " depth 2";	break;
+			case D_NORMAL:	go += " depth 5";	break;
+			case D_HARD:	go += " depth 10";	break;
+			}
+		}
+		string r = uci.Execute(go);
 		string::size_type i = r.find("bestmove");
 		if(i == string::npos)
 			return false;
@@ -95,6 +114,7 @@ bool eGame::Move(const char* move)
 	if(uci.res.find("illegal") == string::npos)
 	{
 		move_side = !move_side;
+		++move_count;
 		if(uci.res.find("mate") != string::npos)
 			game_state = GS_MATE;
 		else if(uci.res.find("check") != string::npos)
@@ -205,24 +225,11 @@ bool eGame::Command(char cmd)
 	bool ok = desktop->Command(cmd);
 	if(ok)
 	{
-		if(piece_selector && !piece_selector->text.empty())
-		{
-			if(piece_selector->text != "-")
-			{
-				if(SelectPiece(piece_selector->text[0]))
-					Move(NULL);
-				else
-					ApplyCell(NULL);
-			}
-			desktop->Remove(piece_selector);
-			desktop->Focus(board);
-			piece_selector->Destroy();
-			delete piece_selector;
-			piece_selector = NULL;
-		}
+		ProcessDialogs();
 		return true;
 	}
-	switch(cmd)
+	if(state == S_GAME)
+		switch(cmd)
 	{
 	case 'a':
 		switch(ApplyCell(board->Cursor()))
@@ -239,7 +246,7 @@ bool eGame::Command(char cmd)
 			break;
 		case AC_SELECT_PIECE:
 			{
-				piece_selector = PieceSelector(move_side, board);
+				piece_selector = xUi::PieceSelector(move_side, board);
 				desktop->Insert(piece_selector);
 				desktop->Focus(piece_selector);
 			}
@@ -249,25 +256,42 @@ bool eGame::Command(char cmd)
 		}
 		return true;
 	case 'b':
-		ApplyCell(NULL);
+		if(*board->Selected())
+			ApplyCell(NULL);
+		else
+			OpenMenu();
 		return true;
-	case 'n':
-		New();
-		return true;
-	case 'g':
-		ApplyCell(NULL);
-		Move(NULL);
+	case 'f':
+		OpenMenu();
 		return true;
 	}
 	return false;
 }
-void eGame::Update()
+void eGame::OpenMenu()
+{
+	menu = xUi::Menu();
+	desktop->Insert(menu);
+	desktop->Focus(menu);
+	UpdateMenu();
+}
+void eGame::UpdateMenu()
+{
+	std::string d;
+	switch(difficulty)
+	{
+	case D_EASY:	d = "Easy";		break;
+	case D_NORMAL:	d = "Normal";	break;
+	case D_HARD:	d = "Hard";		break;
+	}
+	std::string text = "Difficulty (" + d + ")";
+	xUi::MenuUpdateItem(menu, text, "d");
+}
+bool eGame::Update()
 {
 	switch(state)
 	{
 	case S_NONE:
-		splash = new ePicture("res/splash.png", ePoint2(320, 240));
-		splash->Create();
+		splash = xUi::Picture("res/splash.png", ePoint2(320, 240));
 		desktop->Insert(splash);
 		state = S_SPLASH0;
 		break;
@@ -282,10 +306,7 @@ void eGame::Update()
 	case S_INIT:
 		if((clock() - start_time)/(CLOCKS_PER_SEC/1000) > 1000)
 		{
-			desktop->Remove(splash);
-			splash->Destroy();
-			delete splash;
-			splash = NULL;
+			CloseDialog(&splash);
 			desktop->Clear();
 			desktop->Insert(board);
 			desktop->Focus(board);
@@ -295,6 +316,53 @@ void eGame::Update()
 		break;
 	case S_GAME:
 		break;
+	case S_QUIT:
+		break;
 	}
 	desktop->Update();
+	return state != S_QUIT;
+}
+void eGame::ProcessDialogs()
+{
+	if(piece_selector && !piece_selector->text.empty())
+	{
+		if(piece_selector->text != "-")
+		{
+			if(SelectPiece(piece_selector->text[0]))
+				Move(NULL);
+			else
+				ApplyCell(NULL);
+		}
+		CloseDialog(&piece_selector);
+	}
+	else if(menu && !menu->text.empty())
+	{
+		if(menu->text == "nw")
+			New(false);
+		else if(menu->text == "nb")
+			New(true);
+		else if(menu->text == "q")
+			state = S_QUIT;
+		else if(menu->text == "d")
+		{
+			switch(difficulty)
+			{
+			case D_EASY:	difficulty = D_NORMAL;	break;
+			case D_NORMAL:	difficulty = D_HARD;	break;
+			case D_HARD:	difficulty = D_EASY;	break;
+			}
+			UpdateMenu();
+			menu->text.clear();
+			return;
+		}
+		CloseDialog(&menu);
+	}
+}
+void eGame::CloseDialog(xUi::eDialog** d)
+{
+	desktop->Remove(*d);
+	desktop->Focus(board);
+	(*d)->Destroy();
+	delete *d;
+	*d = NULL;
 }

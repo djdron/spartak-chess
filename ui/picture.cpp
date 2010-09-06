@@ -16,7 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "picture.h"
+#include "dialog.h"
+
+namespace xUi
+{
+
+class ePicture : public eDialog
+{
+public:
+	ePicture(const char* name, const ePoint2& size);
+	virtual void Paint(eBufferRGBA& buf);
+
+protected:
+	eBufferRGBA buffer;
+};
 
 ePicture::ePicture(const char* name, const ePoint2& size) : buffer(size)
 {
@@ -29,3 +42,13 @@ void ePicture::Paint(eBufferRGBA& buf)
 		for(int i = 0; i < buffer.Size().x; ++i)
 			buf[bound.beg + ePoint2(i, j)] = buffer[ePoint2(i, j)];
 }
+
+eDialog* Picture(const char* name, const ePoint2& size)
+{
+	eDialog* p = new ePicture(name, size);
+	p->Create();
+	return p;
+}
+
+}
+//namespace xUi

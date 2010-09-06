@@ -25,6 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+namespace xUi
+{
+
 class eDialog;
 typedef std::vector<eDialog*> eDialogs;
 
@@ -62,5 +65,10 @@ protected:
 	eDialog* focus;
 	eBufferRGBA	buffer;
 };
+
+eDialog* Picture(const char* name, const ePoint2& size);
+
+}
+//namespace xUi
 
 #endif//__DIALOG_H__
