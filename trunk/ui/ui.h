@@ -86,6 +86,9 @@ protected:
 	T* data;
 };
 
+namespace xUi
+{
+
 typedef eBuffer<eRGBA> eBufferRGBA;
 
 class eFont
@@ -93,12 +96,15 @@ class eFont
 public:
 	eFont();
 	enum { CHAR_W = 8, CHAR_H = 16, FONT_W = CHAR_W*26, FONT_H = CHAR_H*3 };
-	void DrawChar(eBufferRGBA& buf, const ePoint2& pos, char ch);
-	void DrawText(eBufferRGBA& buf, const ePoint2& pos, const char* text);
+	void DrawChar(eBufferRGBA& buf, const ePoint2& pos, char ch, const eRGBA& color = eRGBA(255, 255, 255, 255));
+	void DrawText(eBufferRGBA& buf, const ePoint2& pos, const char* text, const eRGBA& color = eRGBA(255, 255, 255, 255));
 protected:
 	eBuffer<byte> buffer;
 };
 
 bool ReadPNG(const char* name, void* buffer, dword w, dword h, byte channels);
+
+}
+//namespace xUi
 
 #endif//__UI_H__

@@ -72,6 +72,7 @@ static void UpdateScreen(eGame* game)
 	SDL_UnlockSurface(offscreen);
 	SDL_BlitSurface(offscreen, NULL, screen, NULL);
 	SDL_Flip(screen);
+	SDL_Delay(15);
 }
 
 int main(int argc, char* argv[])
@@ -107,8 +108,10 @@ int main(int argc, char* argv[])
 				}
 			}
     	}
-    	game->Update();
-    	UpdateScreen(game);
+    	if(game->Update())
+    		UpdateScreen(game);
+    	else
+    		quit = true;
     }
     delete game;
     Done();

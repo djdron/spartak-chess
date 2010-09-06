@@ -23,14 +23,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+namespace xUi
+{
+
 class eBoard : public eDialog
 {
 public:
 	eBoard();
 	void	Position(const char* fen);
 	void	Cursor(const char* pos);
-	const char*	Cursor();
+	const char*	Cursor() { return cursor; }
 	void	Selected(const char* pos);
+	const char*	Selected() { return selected; }
 	char	Piece(const char* pos = NULL) const;
 	enum
 	{
@@ -60,5 +64,8 @@ protected:
 	bool	flash;
 	bool	flip;
 };
+
+}
+//namespace xUi
 
 #endif//__BOARD_H__

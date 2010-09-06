@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "board.h"
 
+namespace xUi
+{
+
 class ePieceSelector : public eDialog
 {
 public:
@@ -32,7 +35,7 @@ void ePieceSelector::Paint(eBufferRGBA& buf)
 {
 	for(int j = 0; j < buf.Size().y; ++j)
 		for(int i = 0; i < buf.Size().x; ++i)
-			buf[ePoint2(i, j)] = buf[ePoint2(i, j)] + eRGBA(0, 0, 0, 0x80);
+			buf[ePoint2(i, j)] = buf[ePoint2(i, j)] + eRGBA(0, 0, 0, 0xc0);
 	ePoint2 pos(68, 100);
 	font->DrawText(buf, pos, "Select piece:");
 	pos.y += 16;
@@ -79,3 +82,6 @@ eDialog* PieceSelector(bool side, eBoard* board)
 	ps->Create();
 	return ps;
 }
+
+}
+//namespace xUi
