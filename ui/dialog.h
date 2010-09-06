@@ -34,17 +34,31 @@ typedef std::vector<eDialog*> eDialogs;
 class eDialog
 {
 public:
+	eDialog() : valid(false) {}
 	virtual ~eDialog() {}
 	virtual void Create() {}
 	virtual void Destroy();
 	virtual void Paint(eBufferRGBA& buf);
 	virtual bool Command(char cmd) { return false; }
-	void Insert(eDialog* child) { childs.push_back(child); }
+	virtual bool Valid() const;
+	virtual bool Update();
+
+	void Insert(eDialog* child) { childs.push_back(child); Invalidate(); }
 	void Remove(eDialog* child);
 
+	void Invalidate() { valid = false; }
+
+	const eRect& Bound() const { return bound; }
+	void Bound(const eRect& b) { bound = b; Invalidate(); }
+
+	const std::string& Text() const { return text; }
+	void Text(const std::string& t) { if(text != t) { text = t; Invalidate(); } }
+
+protected:
 	eRect bound;
 	std::string text;
 	eDialogs childs;
+	bool valid;
 
 	static eFont* font;
 };
@@ -54,7 +68,7 @@ class eDesktop : public eDialog
 public:
 	eDesktop();
 	virtual ~eDesktop();
-	void 	Update();
+	virtual bool Update();
 	void	Clear() { buffer.Clear(); }
 	eRGBA*	Buffer() const { return buffer.Data(); }
 	eDialog* Focus() const { return focus; }

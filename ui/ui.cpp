@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ui.h"
+#include "../stockfish/misc.h"
 #include <png.h>
 #include <string>
 #include "../io.h"
@@ -129,3 +130,5 @@ void eFont::DrawText(eBufferRGBA& buf, const ePoint2& _pos, const char* text, co
 
 }
 //namespace xUi
+
+int Clock() { return get_system_time(); }

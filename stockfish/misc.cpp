@@ -185,23 +185,10 @@ int get_system_time() {
 #elif defined (_DINGOO)
 	time_t t = clock();
 	return t/(CLOCKS_PER_SEC/1000);
-//	static uint32_t time_start = clock();
-//	static uint32_t time_passed = 0;
-//	uint32_t time_current = clock();
-//	uint32_t time_d = time_current - time_start;
-//	if(time_d > CLOCKS_PER_SEC)
-//	{
-//		time_d -= CLOCKS_PER_SEC;
-//		time_start += CLOCKS_PER_SEC;
-//		time_passed += 1000;
-//	}
-//	return time_d*1000/CLOCKS_PER_SEC + time_passed;
 #else
-	time_t t = clock();
-	return t/(CLOCKS_PER_SEC/1000);
-//    struct timeval t;
-//    gettimeofday(&t, NULL);
-//    return t.tv_sec*1000 + t.tv_usec/1000;
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec*1000 + t.tv_usec/1000;
 #endif
 }
 

@@ -54,6 +54,8 @@ inline ePoint2 operator+(const ePoint2& v1, const ePoint2& v2)
 
 struct eRect
 {
+	eRect() {}
+	eRect(const ePoint2& b, const ePoint2& e) : beg(b), end(e) {}
 	ePoint2 beg;
 	ePoint2 end;
 };
@@ -106,5 +108,7 @@ bool ReadPNG(const char* name, void* buffer, dword w, dword h, byte channels);
 
 }
 //namespace xUi
+
+int Clock();
 
 #endif//__UI_H__

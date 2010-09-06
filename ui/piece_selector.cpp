@@ -33,6 +33,7 @@ public:
 };
 void ePieceSelector::Paint(eBufferRGBA& buf)
 {
+	valid = true;
 	for(int j = 0; j < buf.Size().y; ++j)
 		for(int i = 0; i < buf.Size().x; ++i)
 			buf[ePoint2(i, j)] = buf[ePoint2(i, j)] + eRGBA(0, 0, 0, 0xc0);
@@ -54,24 +55,30 @@ bool ePieceSelector::Command(char cmd)
 	{
 	case 'l':
 		if(selected > 1)
+		{
 			--selected;
-		return true;
+			Invalidate();
+		}
+		break;
 	case 'r':
 		if(selected < 4)
+		{
 			++selected;
-		return true;
+			Invalidate();
+		}
+		break;
 	case 'a':
 		switch(selected)
 		{
-		case 1:	text = "q";	break;
-		case 2:	text = "r";	break;
-		case 3:	text = "n";	break;
-		case 4:	text = "b";	break;
+		case 1:	Text("q");	break;
+		case 2:	Text("r");	break;
+		case 3:	Text("n");	break;
+		case 4:	Text("b");	break;
 		}
-		return true;
+		break;
 	case 'b':
-		text = "-";
-		return true;
+		Text("-");
+		break;
 	}
 	return true;
 }
