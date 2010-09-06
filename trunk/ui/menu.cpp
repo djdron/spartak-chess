@@ -62,11 +62,15 @@ void eMenu::UpdateItem(const std::string& text, const std::string& id)
 	for(eItems::iterator i = items.begin(); i != items.end(); ++i)
 	{
 		if(i->id == id)
+		{
 			i->text = text;
+			Invalidate();
+		}
 	}
 }
 void eMenu::Paint(eBufferRGBA& buf)
 {
+	valid = true;
 	ePoint2 p = bound.beg + ePoint2(10, 10);
 	for(int j = bound.beg.y; j < bound.end.y; ++j)
 		for(int i = bound.beg.x; i < bound.end.x; ++i)
@@ -75,7 +79,7 @@ void eMenu::Paint(eBufferRGBA& buf)
 	{
 		int idx = i - items.begin();
 		bool sel = selected == idx;
-		font->DrawText(buf, p, i->text.c_str(), sel ? eRGBA(255, 255, 255) : eRGBA(192, 192, 192));
+		font->DrawText(buf, p, i->text.c_str(), sel ? eRGBA(255, 255, 255) : eRGBA(160, 160, 160));
 		p.y += font->CHAR_H;
 	}
 }
@@ -86,17 +90,19 @@ bool eMenu::Command(char cmd)
 	case 'u':
 		if(--selected < 0)
 			selected = (int)items.size() - 1;
+		Invalidate();
 		break;
 	case 'd':
 		if(++selected >= (int)items.size())
 			selected = 0;
+		Invalidate();
 		break;
 	case 'a':
-		text = items[selected].id;
+		Text(items[selected].id);
 		break;
 	case 'b':
 	case 'f':
-		text = "-";
+		Text("-");
 		break;
 	}
 	return true;

@@ -106,6 +106,8 @@ bool UpdateKeys()
 inline word BGR565(byte r, byte g, byte b) { return (((r&~7) << 8)|((g&~3) << 3)|(b >> 3)); }
 void UpdateScreen()
 {
+	if(!game->Desktop().Update())
+		return;
 	word* screen = (word*)_lcd_get_frame();
 	eRGBA* data = game->Desktop().Buffer();
 	for(int y = 0; y < 240; ++y)
@@ -126,7 +128,7 @@ void thread_proc(void* arg)
 	while(UpdateKeys() && game->Update())
 	{
 		UpdateScreen();
-//		mdelay(20);
+		mdelay(15);
 	}
 	delete game;
 	thread_finished = true;

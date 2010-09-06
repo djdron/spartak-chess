@@ -27,8 +27,9 @@ eBoard::eBoard()
 	: chess_pieces(ePoint2(PIECES_W, PIECES_H))
 	, chess_board(ePoint2(BOARD_W, BOARD_H))
 	, position(ePoint2(BOARD_DIM, BOARD_DIM))
-	, frame(0), changed(true), flash(false), flip(false)
+	, flash(false), flip(false)
 {
+	ResetTimer();
 	Position("");
 	Cursor("");
 	Selected("");
@@ -37,8 +38,8 @@ eBoard::eBoard()
 }
 void eBoard::Position(const char* fen)
 {
+	Invalidate();
 	static const std::string pieces_chars = "KQRNBPkqrnbp";
-	changed = true;
 	const char* piece = fen;
 	int skip = 0;
 	for(int j = 0; j < BOARD_DIM; ++j)
@@ -68,24 +69,22 @@ void eBoard::Position(const char* fen)
 }
 void eBoard::Cursor(const char* pos)
 {
+	Invalidate();
 	if(*pos)
 	{
 		assert(strlen(pos) == 2);
 	}
 	strcpy(cursor, pos);
-	changed = true;
-	frame = 0;
 	flash = false;
 }
 void eBoard::Selected(const char* pos)
 {
+	Invalidate();
 	if(*pos)
 	{
 		assert(strlen(pos) == 2);
 	}
 	strcpy(selected, pos);
-	changed = true;
-	frame = 0;
 	flash = false;
 }
 char eBoard::Piece(const char* pos) const
@@ -139,17 +138,18 @@ void eBoard::DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellVie
 		}
 	}
 }
+bool eBoard::Update()
+{
+	if(cursor[0] && PassedTimeMs() > 200)
+	{
+		flash = !flash;
+		Invalidate();
+	}
+	return eDialog::Update();
+}
 void eBoard::Paint(eBufferRGBA& buf)
 {
-	if(cursor[0] && ++frame > 10)
-	{
-		frame = 0;
-		flash = !flash;
-		changed = true;
-	}
-	if(!changed)
-		return;
-
+	valid = true;
 	for(int i = 0; i < BOARD_DIM; ++i)
 	{
 		char col = flip ? 'h' - i : 'a' + i;
@@ -211,30 +211,27 @@ bool eBoard::Command(char cmd)
 					--pos[0];
 				else
 					pos[0] = 'h';
-				Cursor(pos);
 				break;
 			case 'r':
 				if(pos[0] != 'h')
 					++pos[0];
 				else
 					pos[0] = 'a';
-				Cursor(pos);
 				break;
 			case 'u':
 				if(pos[1] != '8')
 					++pos[1];
 				else
 					pos[1] = '1';
-				Cursor(pos);
 				break;
 			case 'd':
 				if(pos[1] != '1')
 					--pos[1];
 				else
 					pos[1] = '8';
-				Cursor(pos);
 				break;
 			}
+			Cursor(pos);
 		}
 		return true;
 	}

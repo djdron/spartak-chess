@@ -36,6 +36,7 @@ void eDialog::Destroy()
 
 void eDialog::Paint(eBufferRGBA& buf)
 {
+	valid = true;
 	buf.Clear(bound);
 	if(!text.empty())
 		font->DrawText(buf, bound.beg, text.c_str());
@@ -48,7 +49,27 @@ void eDialog::Remove(eDialog* child)
 {
 	eDialogs::iterator i = std::find(childs.begin(), childs.end(), child);
 	if(i != childs.end())
+	{
 		childs.erase(i);
+		Invalidate();
+	}
+}
+bool eDialog::Valid() const
+{
+	for(eDialogs::const_iterator i = childs.begin(); i != childs.end(); ++i)
+	{
+		if(!(*i)->Valid())
+			return false;
+	}
+	return valid;
+}
+bool eDialog::Update()
+{
+	for(eDialogs::iterator i = childs.begin(); i != childs.end(); ++i)
+	{
+		(*i)->Update();
+	}
+	return !Valid();
 }
 
 eDesktop::eDesktop() : focus(NULL), buffer(ePoint2(320, 240))
@@ -59,10 +80,15 @@ eDesktop::~eDesktop()
 {
 	delete font;
 }
-void eDesktop::Update()
+bool eDesktop::Update()
 {
-	buffer.Clear();
-	Paint(buffer);
+	if(eDialog::Update())
+	{
+		buffer.Clear();
+		Paint(buffer);
+		return true;
+	}
+	return false;
 }
 
 }

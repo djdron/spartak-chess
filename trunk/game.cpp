@@ -50,8 +50,7 @@ void eGame::Init()
 	board->Create();
 	game_status = new xUi::eDialog;
 	game_status->Create();
-	game_status->bound.beg = ePoint2(240, 0);
-	game_status->bound.end = ePoint2(319, 16);
+	game_status->Bound(eRect(ePoint2(240, 0), ePoint2(319, 16)));
 	Application::initialize();
 	New();
 }
@@ -147,7 +146,7 @@ void eGame::UpdateBoardPosition()
 			board->Position(pos.c_str());
 		}
 	}
-	game_status->text = GameState();
+	game_status->Text(GameState());
 }
 const char* eGame::GameState() const
 {
@@ -299,12 +298,12 @@ bool eGame::Update()
 		state = S_SPLASH;
 		break;
 	case S_SPLASH:
-		start_time = clock();
+		start_time = Clock();
 		Init();
 		state = S_INIT;
 		break;
 	case S_INIT:
-		if((clock() - start_time)/(CLOCKS_PER_SEC/1000) > 1000)
+		if(Clock() - start_time > 1000)
 		{
 			CloseDialog(&splash);
 			desktop->Clear();
@@ -319,31 +318,30 @@ bool eGame::Update()
 	case S_QUIT:
 		break;
 	}
-	desktop->Update();
 	return state != S_QUIT;
 }
 void eGame::ProcessDialogs()
 {
-	if(piece_selector && !piece_selector->text.empty())
+	if(piece_selector && !piece_selector->Text().empty())
 	{
-		if(piece_selector->text != "-")
+		if(piece_selector->Text() != "-")
 		{
-			if(SelectPiece(piece_selector->text[0]))
+			if(SelectPiece(piece_selector->Text()[0]))
 				Move(NULL);
 			else
 				ApplyCell(NULL);
 		}
 		CloseDialog(&piece_selector);
 	}
-	else if(menu && !menu->text.empty())
+	else if(menu && !menu->Text().empty())
 	{
-		if(menu->text == "nw")
+		if(menu->Text() == "nw")
 			New(false);
-		else if(menu->text == "nb")
+		else if(menu->Text() == "nb")
 			New(true);
-		else if(menu->text == "q")
+		else if(menu->Text() == "q")
 			state = S_QUIT;
-		else if(menu->text == "d")
+		else if(menu->Text() == "d")
 		{
 			switch(difficulty)
 			{
@@ -352,7 +350,7 @@ void eGame::ProcessDialogs()
 			case D_HARD:	difficulty = D_EASY;	break;
 			}
 			UpdateMenu();
-			menu->text.clear();
+			menu->Text(std::string());
 			return;
 		}
 		CloseDialog(&menu);

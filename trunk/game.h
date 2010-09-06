@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __GAME_H__
 #define __GAME_H__
 
-#include <time.h>
-
 #pragma once
 
 namespace xUi
@@ -74,7 +72,7 @@ protected:
 
 	enum eState { S_NONE, S_SPLASH0, S_SPLASH, S_INIT, S_GAME, S_QUIT };
 	eState state;
-	clock_t start_time;
+	int start_time;
 
 	enum eDifficulty { D_EASY, D_NORMAL, D_HARD };
 	eDifficulty difficulty;

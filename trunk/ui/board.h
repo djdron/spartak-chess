@@ -44,25 +44,30 @@ public:
 	};
 	virtual void Paint(eBufferRGBA& buf);
 	virtual bool Command(char cmd);
+	virtual bool Update();
 
 	enum eCellView { CELL_NORMAL, CELL_LIGHT, CELL_DARK };
 	void DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, char piece);
 	bool Flash() const { return flash; }
 
-	void Flip(bool _flip) { flip = _flip; changed = true; }
+	void Flip(bool _flip) { flip = _flip; Invalidate(); }
 	bool Flip() const { return flip; }
 
 	eBufferRGBA chess_pieces;
 	eBufferRGBA chess_board;
 
 protected:
+	int		PassedTimeMs() const { return Clock() - timer; }
+	void	ResetTimer() { timer = Clock(); }
+	void 	Invalidate() { ResetTimer(); eDialog::Invalidate(); }
+protected:
 	eBuffer<char> position;
 	char	cursor[3];
 	char	selected[3];
-	int		frame;
-	bool	changed;
 	bool	flash;
 	bool	flip;
+
+	int		timer;
 };
 
 }

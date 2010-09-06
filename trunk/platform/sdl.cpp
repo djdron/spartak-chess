@@ -57,6 +57,8 @@ static void Done()
 inline word BGR565(byte r, byte g, byte b) { return (((r&~7) << 8)|((g&~3) << 3)|(b >> 3)); }
 static void UpdateScreen(eGame* game)
 {
+	if(!game->Desktop().Update())
+		return;
 	SDL_LockSurface(offscreen);
 	eRGBA* data = game->Desktop().Buffer();
 	word* scr = (word*)offscreen->pixels;

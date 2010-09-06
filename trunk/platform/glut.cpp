@@ -48,6 +48,8 @@ static const GLubyte triangles[2 * 3] =
 
 static void DrawGL(int _w, int _h)
 {
+	if(!game->Desktop().Update())
+		return;
 	dword* p = tex;
 	eRGBA* data = game->Desktop().Buffer();
 	for(int y = 0; y < 240; ++y)
@@ -93,6 +95,7 @@ static void DrawGL(int _w, int _h)
 	glDrawElements(GL_TRIANGLES, 2*3, GL_UNSIGNED_BYTE, triangles);
 
 	glFlush();
+	glutSwapBuffers();
 }
 
 static int window = -1;
@@ -111,7 +114,6 @@ static void OnDraw()
 	if(game->Update())
 	{
 		DrawGL(w, h);
-		glutSwapBuffers();
 	}
 	else
 		exit(0);
