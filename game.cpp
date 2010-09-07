@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "stockfish/application.h"
 #include "stockfish/uci.h"
 #include <string.h>
+#include <stdio.h>
+#include <algorithm>
 #include "game.h"
+#include "io.h"
 #include "ui/board.h"
 
 namespace xUi
@@ -32,8 +35,7 @@ void MenuUpdateItem(eDialog* m, const std::string& text, const std::string& id);
 
 eGame::eGame()
 	: desktop(NULL), board(NULL), piece_selector(NULL), game_status(NULL), splash(NULL), menu(NULL)
-	, move_side(false), game_state(GS_NONE), state(S_NONE), start_time(0), difficulty(D_EASY)
-	, move_count(0)
+	, move_count(0), game_state(GS_NONE), state(S_NONE), start_time(0), difficulty(D_EASY)
 {
 	desktop = new xUi::eDesktop;
 	desktop->Create();
@@ -53,19 +55,23 @@ void eGame::Init()
 	game_status->Bound(eRect(ePoint2(240, 0), ePoint2(319, 16)));
 	Application::initialize();
 	New();
+	Load();
 }
 void eGame::Done()
 {
 	if(state > S_SPLASH)
+	{
 		Application::free_resources();
+		Store();
+	}
 	desktop->Destroy();
 	delete desktop;
 	desktop = NULL;
 }
 void eGame::New(bool side)
 {
-	move_side = false;
 	move_count = 0;
+	moves.clear();
 	game_state = GS_NONE;
 	ApplyCell(NULL);
 	board->Cursor(side ? "d6" : "e3");
@@ -78,13 +84,14 @@ void eGame::New(bool side)
 		Move(NULL);
 	UpdateBoardPosition();
 }
-bool eGame::Move(const char* move)
+bool eGame::Move(const char* _move)
 {
 	if(Finished())
 		return false;
 	using namespace std;
 	UCI_Command uci;
-	if(!move)
+	string move;
+	if(!_move)
 	{
 		std::string go = "go";
 		if(move_count > 10)
@@ -103,17 +110,22 @@ bool eGame::Move(const char* move)
 		i += 9;
 		string::size_type j = r.find(" ", i);
 		if(j == string::npos)
-			j = r.length();
-		uci.Execute("position moves " + r.substr(i, j - i));
+			j = r.find("\n", i);
+		if(j == string::npos)
+			return false;
+		move = r.substr(i, j - i);
 	}
 	else
 	{
-		uci.Execute("position moves " + string(move));
+		move = _move;
 	}
+	uci.Execute("position moves " + move);
 	if(uci.res.find("illegal") == string::npos)
 	{
-		move_side = !move_side;
-		++move_count;
+		move_count += count(move.begin(), move.end(), ' ') + 1;
+		if(!moves.empty())
+			moves += " ";
+		moves += move;
 		if(uci.res.find("mate") != string::npos)
 			game_state = GS_MATE;
 		else if(uci.res.find("check") != string::npos)
@@ -188,9 +200,9 @@ eGame::eApplyCellResult eGame::ApplyCell(const char* cell)
 	case 0:
 		{
 			char p = board->Piece(cell);
-			if(p >= 0 && p <= 5 && move_side)
+			if(p >= 0 && p <= 5 && MoveSide())
 				return AC_ERROR;
-			if(p >= 6 && p <= 11 && !move_side)
+			if(p >= 6 && p <= 11 && !MoveSide())
 				return AC_ERROR;
 			strcat(move, cell);
 			board->Selected(cell);
@@ -198,9 +210,9 @@ eGame::eApplyCellResult eGame::ApplyCell(const char* cell)
 		}
 	case 2:
 		strcat(move, cell);
-		if(!move_side && move[1] == '7' && move[3] == '8' && board->Piece() == 5) // white pawn reached end
+		if(!MoveSide() && move[1] == '7' && move[3] == '8' && board->Piece() == 5) // white pawn reached end
 			return AC_SELECT_PIECE;
-		else if(move_side && move[1] == '2' && move[3] == '1' && board->Piece() == 11) // black pawn
+		else if(MoveSide() && move[1] == '2' && move[3] == '1' && board->Piece() == 11) // black pawn
 			return AC_SELECT_PIECE;
 		if(Move(move))
 			return AC_MOVE_END;
@@ -245,7 +257,7 @@ bool eGame::Command(char cmd)
 			break;
 		case AC_SELECT_PIECE:
 			{
-				piece_selector = xUi::PieceSelector(move_side, board);
+				piece_selector = xUi::PieceSelector(MoveSide(), board);
 				desktop->Insert(piece_selector);
 				desktop->Focus(piece_selector);
 			}
@@ -275,13 +287,7 @@ void eGame::OpenMenu()
 }
 void eGame::UpdateMenu()
 {
-	std::string d;
-	switch(difficulty)
-	{
-	case D_EASY:	d = "Easy";		break;
-	case D_NORMAL:	d = "Normal";	break;
-	case D_HARD:	d = "Hard";		break;
-	}
+	std::string d = difficulty_names[difficulty];
 	std::string text = "Difficulty (" + d + ")";
 	xUi::MenuUpdateItem(menu, text, "d");
 }
@@ -363,4 +369,69 @@ void eGame::CloseDialog(xUi::eDialog** d)
 	(*d)->Destroy();
 	delete *d;
 	*d = NULL;
+}
+using namespace std;
+static const char* config_name = "spartak-chess.cfg";
+static string GetLine(FILE* f)
+{
+	char l[4096];
+	fgets(l, 4096, f);
+	int len = strlen(l);
+	if(len && l[len - 1] == '\n')
+		l[len - 1] = '\0';
+	return l;
+}
+static void PutLine(const string& _l, FILE* f)
+{
+	string l = _l;
+	l += "\n";
+	fputs(l.c_str(), f);
+}
+static void Write(const string& name, const string& value, FILE* f)
+{
+	string l;
+	l += name;
+	l += ": ";
+	l += value;
+	PutLine(l, f);
+}
+static void Read(const string& name, string& value, FILE* f)
+{
+	value.clear();
+	string l = GetLine(f);
+	if(l.find(name + ": ") == 0)
+	{
+		value = l.substr(name.length() + 2);
+	}
+}
+const char* eGame::difficulty_names[] = { "easy", "normal", "hard", NULL };
+void eGame::Load()
+{
+	FILE* f = fopen(xIo::Resource(config_name), "rb");
+	if(!f)
+		return;
+	string s;
+	Read("moves", s, f);
+	if(!s.empty())
+		Move(s.c_str());
+	Read("side", s, f);
+	board->Flip(s == "black");
+	Read("difficulty", s, f);
+	difficulty = D_EASY;
+	for(const char** d = difficulty_names; *d; ++d)
+	{
+		if(s == *d)
+			difficulty = (eDifficulty)(d - difficulty_names);
+	}
+	fclose(f);
+}
+void eGame::Store()
+{
+	FILE* f = fopen(xIo::Resource(config_name), "wb");
+	if(!f)
+		return;
+	Write("moves", moves, f);
+	Write("side", board->Flip() ? "black" : "white", f);
+	Write("difficulty", difficulty_names[difficulty], f);
+	fclose(f);
 }

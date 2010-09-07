@@ -42,8 +42,8 @@ protected:
 };
 void eMenu::Create()
 {
-	AddItem("New Game (White)", "nw");
-	AddItem("New Game (Black)", "nb");
+	AddItem("New game (white)", "nw");
+	AddItem("New game (black)", "nb");
 	AddItem("", "d");
 //	AddItem("Book", "b");
 	AddItem("Quit", "q");

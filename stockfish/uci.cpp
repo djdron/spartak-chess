@@ -315,19 +315,20 @@ namespace {
 					RootPosition.do_move(move, st);
 					if (RootPosition.rule_50_counter() == 0)
 						RootPosition.reset_game_ply();
-					if(RootPosition.is_mate())
-						uci << "mate" << endl;
-					else if(RootPosition.is_check())
-						uci << "check" << endl;
-					else if(RootPosition.is_draw())
-						uci << "draw" << endl;
                 }
                 else
                 {
                 	uci << token << ": illegal move" << endl;
                 }
             }
-            // Our StateInfo st is about going out of scope so copy
+			if(RootPosition.is_mate())
+				uci << "mate" << endl;
+			else if(RootPosition.is_check())
+				uci << "check" << endl;
+			else if(RootPosition.is_draw())
+				uci << "draw" << endl;
+
+			// Our StateInfo st is about going out of scope so copy
             // its content inside RootPosition before they disappear.
             RootPosition.detach();
         }

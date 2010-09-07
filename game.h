@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef __GAME_H__
 #define __GAME_H__
 
+#include <string>
+
 #pragma once
 
 namespace xUi
@@ -55,6 +57,9 @@ protected:
 	void UpdateMenu();
 	void ProcessDialogs();
 	void CloseDialog(xUi::eDialog** d);
+	bool MoveSide() const { return move_count % 2 != 0; }
+	void Load();
+	void Store();
 
 protected:
 	xUi::eDesktop*	desktop;
@@ -65,7 +70,9 @@ protected:
 	xUi::eDialog*	menu;
 
 	char move[6];
-	bool move_side;
+	int	move_count;
+
+	std::string moves;
 
 	enum eGameState { GS_NONE, GS_CHECK, GS_MATE, GS_STALEMATE, GS_DRAW };
 	eGameState game_state;
@@ -76,8 +83,7 @@ protected:
 
 	enum eDifficulty { D_EASY, D_NORMAL, D_HARD };
 	eDifficulty difficulty;
-
-	int	move_count;
+	static const char* difficulty_names[];
 };
 
 #endif//__GAME_H__
