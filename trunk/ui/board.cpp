@@ -75,7 +75,7 @@ void eBoard::Cursor(const char* pos)
 		assert(strlen(pos) == 2);
 	}
 	strcpy(cursor, pos);
-	flash = false;
+	flash = true;
 }
 void eBoard::Selected(const char* pos)
 {
