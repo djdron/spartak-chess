@@ -415,7 +415,9 @@ void eGame::Load()
 	if(!s.empty())
 		Move(s.c_str());
 	Read("side", s, f);
-	board->Flip(s == "black");
+	bool side = s == "black";
+	board->Flip(side);
+	board->Cursor(side ? "d6" : "e3");
 	Read("difficulty", s, f);
 	difficulty = D_EASY;
 	for(const char** d = difficulty_names; *d; ++d)
