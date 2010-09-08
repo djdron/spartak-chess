@@ -38,6 +38,7 @@ ePicture::ePicture(const char* name, const ePoint2& size) : buffer(size)
 
 void ePicture::Paint(eBufferRGBA& buf)
 {
+	valid = true;
 	for(int j = 0; j < buffer.Size().y; ++j)
 		for(int i = 0; i < buffer.Size().x; ++i)
 			buf[bound.beg + ePoint2(i, j)] = buffer[ePoint2(i, j)];
