@@ -375,6 +375,7 @@ static const char* config_name = "spartak-chess.cfg";
 static string GetLine(FILE* f)
 {
 	char l[4096];
+	l[0] = '\0';
 	fgets(l, 4096, f);
 	int len = strlen(l);
 	if(len && l[len - 1] == '\n')
@@ -411,9 +412,6 @@ void eGame::Load()
 	if(!f)
 		return;
 	string s;
-	Read("moves", s, f);
-	if(!s.empty())
-		Move(s.c_str());
 	Read("side", s, f);
 	bool side = s == "black";
 	board->Flip(side);
@@ -425,6 +423,9 @@ void eGame::Load()
 		if(s == *d)
 			difficulty = (eDifficulty)(d - difficulty_names);
 	}
+	Read("moves", s, f);
+	if(!s.empty())
+		Move(s.c_str());
 	fclose(f);
 }
 void eGame::Store()
@@ -432,8 +433,8 @@ void eGame::Store()
 	FILE* f = fopen(xIo::Resource(config_name), "wb");
 	if(!f)
 		return;
-	Write("moves", moves, f);
 	Write("side", board->Flip() ? "black" : "white", f);
 	Write("difficulty", difficulty_names[difficulty], f);
+	Write("moves", moves, f);
 	fclose(f);
 }
