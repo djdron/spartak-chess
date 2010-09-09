@@ -34,8 +34,11 @@ void MenuUpdateItem(eDialog* m, const std::string& text, const std::string& id);
 //namespace xUi
 
 eGame::eGame()
-	: desktop(NULL), board(NULL), piece_selector(NULL), game_status(NULL), splash(NULL), menu(NULL)
-	, move_count(0), game_state(GS_NONE), state(S_NONE), start_time(0), difficulty(D_EASY)
+	: desktop(NULL), board(NULL), piece_selector(NULL)
+	, game_status(NULL), move_status(NULL)
+	, splash(NULL), menu(NULL)
+	, move_count(0), game_state(GS_NONE), state(S_NONE), timer(0)
+	, move_state(MS_PLAYER), move_state_changed(true), difficulty(D_EASY)
 {
 	desktop = new xUi::eDesktop;
 	desktop->Create();
@@ -52,7 +55,10 @@ void eGame::Init()
 	board->Create();
 	game_status = new xUi::eDialog;
 	game_status->Create();
-	game_status->Bound(eRect(ePoint2(240, 0), ePoint2(319, 16)));
+	game_status->Bound(eRect(ePoint2(240, 0), ePoint2(320, xUi::eFont::CHAR_H)));
+	move_status = new xUi::eDialog;
+	move_status->Create();
+	move_status->Bound(eRect(ePoint2(240, 240 - xUi::eFont::CHAR_H), ePoint2(320, xUi::eFont::CHAR_H)));
 	Application::initialize();
 	New();
 	Load();
@@ -70,9 +76,12 @@ void eGame::Done()
 }
 void eGame::New(bool side)
 {
+	move[0] = '\0';
+	move_ai[0] = '\0';
 	move_count = 0;
 	moves.clear();
 	game_state = GS_NONE;
+	stored_cursor[0] = '\0';
 	ApplyCell(NULL);
 	board->Cursor(side ? "d6" : "e3");
 	board->Flip(side);
@@ -80,52 +89,30 @@ void eGame::New(bool side)
 	uci.Execute("ucinewgame");
 //	uci.Execute("position fen k7/7P/8/8/8/8/6p1/K w -");
 //	move_side = true;
+	MoveState(MS_PLAYER);
 	if(side)
 		Move(NULL);
-	UpdateBoardPosition();
 }
 bool eGame::Move(const char* _move)
 {
 	if(Finished())
 		return false;
-	using namespace std;
-	UCI_Command uci;
-	string move;
 	if(!_move)
 	{
-		std::string go = "go";
-		if(move_count > 10)
-		{
-			switch(difficulty)
-			{
-			case D_EASY:	go += " depth 2";	break;
-			case D_NORMAL:	go += " depth 5";	break;
-			case D_HARD:	go += " depth 10";	break;
-			}
-		}
-		string r = uci.Execute(go);
-		string::size_type i = r.find("bestmove");
-		if(i == string::npos)
-			return false;
-		i += 9;
-		string::size_type j = r.find(" ", i);
-		if(j == string::npos)
-			j = r.find("\n", i);
-		if(j == string::npos)
-			return false;
-		move = r.substr(i, j - i);
+		strcpy(stored_cursor, board->Cursor());
+		board->Cursor("");
+		MoveState(MS_AI_THINK);
+		return false;
 	}
-	else
-	{
-		move = _move;
-	}
-	uci.Execute("position moves " + move);
+	using namespace std;
+	UCI_Command uci;
+	uci.Execute(string("position moves ") + _move);
 	if(uci.res.find("illegal") == string::npos)
 	{
-		move_count += count(move.begin(), move.end(), ' ') + 1;
 		if(!moves.empty())
 			moves += " ";
-		moves += move;
+		moves += _move;
+		move_count = count(moves.begin(), moves.end(), ' ') + 1;
 		if(uci.res.find("mate") != string::npos)
 			game_state = GS_MATE;
 		else if(uci.res.find("check") != string::npos)
@@ -158,18 +145,29 @@ void eGame::UpdateBoardPosition()
 			board->Position(pos.c_str());
 		}
 	}
-	game_status->Text(GameState());
-}
-const char* eGame::GameState() const
-{
+	string s;
+	if(!Finished())
+	{
+		switch(move_state)
+		{
+		case MS_PLAYER:		s = "your turn";	break;
+		case MS_AI_THINK:	s = "thinking";		break;
+		case MS_AI_MOVE0:
+		case MS_AI_MOVE:	s = "my turn";		break;
+		default: break;
+		}
+	}
+	move_status->Text(s);
+	s.clear();
 	switch(game_state)
 	{
-	case GS_MATE:		return "mate";
-	case GS_STALEMATE:	return "stalemate";
-	case GS_DRAW:		return "draw";
-	case GS_CHECK:		return "check";
-	default:			return "";
+	case GS_MATE:		s = "checkmate";	break;
+	case GS_STALEMATE:	s = "stalemate";	break;
+	case GS_DRAW:		s = "draw";			break;
+	case GS_CHECK:		s = "check";		break;
+	default: break;
 	}
+	game_status->Text(s);
 }
 bool eGame::Finished() const
 {
@@ -304,27 +302,100 @@ bool eGame::Update()
 		state = S_SPLASH;
 		break;
 	case S_SPLASH:
-		start_time = Clock();
+		timer = Clock();
 		Init();
 		state = S_INIT;
 		break;
 	case S_INIT:
-		if(Clock() - start_time > 1000)
+		if(Clock() - timer > 1000)
 		{
 			CloseDialog(&splash);
 			desktop->Clear();
 			desktop->Insert(board);
 			desktop->Focus(board);
 			desktop->Insert(game_status);
+			desktop->Insert(move_status);
 			state = S_GAME;
 		}
 		break;
 	case S_GAME:
+		UpdateMove();
 		break;
 	case S_QUIT:
 		break;
 	}
 	return state != S_QUIT;
+}
+void eGame::MoveState(eMoveState _ms)
+{
+	move_state = _ms;
+	move_state_changed = true;
+	UpdateBoardPosition();
+}
+void eGame::UpdateMove()
+{
+	if(move_state_changed) // one frame delay for redraw
+	{
+		move_state_changed = false;
+		return;
+	}
+	switch(move_state)
+	{
+	case MS_PLAYER:
+		break;
+	case MS_AI_THINK:
+		{
+			using namespace std;
+			string go = "go";
+			if(move_count > 10)
+			{
+				switch(difficulty)
+				{
+				case D_EASY:	go += " depth 2";	break;
+				case D_NORMAL:	go += " depth 5";	break;
+				case D_HARD:	go += " depth 10";	break;
+				}
+			}
+			UCI_Command uci;
+			string r = uci.Execute(go);
+			string::size_type i = r.find("bestmove");
+			if(i == string::npos)
+				break;
+			i += 9;
+			string::size_type j = r.find(" ", i);
+			if(j == string::npos)
+				j = r.find("\n", i);
+			if(j == string::npos)
+				break;
+			strcpy(move_ai, r.substr(i, j - i).c_str());
+			char sel[3];
+			strncpy(sel, move_ai, 2);
+			board->Selected(sel);
+			MoveState(MS_AI_MOVE0);
+			timer = Clock();
+		}
+		break;
+	case MS_AI_MOVE0:
+		if(Clock() - timer > 500)
+		{
+			Move(move_ai);
+			char sel[3];
+			strncpy(sel, move_ai + 2, 2);
+			board->Selected(sel);
+			MoveState(MS_AI_MOVE);
+			timer = Clock();
+		}
+		break;
+	case MS_AI_MOVE:
+		if(Clock() - timer > 500)
+		{
+			board->Selected("");
+			board->Cursor(stored_cursor);
+			MoveState(MS_PLAYER);
+			ApplyCell(NULL);
+		}
+		break;
+	}
 }
 void eGame::ProcessDialogs()
 {
@@ -426,6 +497,8 @@ void eGame::Load()
 	Read("moves", s, f);
 	if(!s.empty())
 		Move(s.c_str());
+	if(side != MoveSide())
+		Move(NULL);
 	fclose(f);
 }
 void eGame::Store()

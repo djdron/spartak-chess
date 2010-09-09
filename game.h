@@ -52,7 +52,7 @@ protected:
 	void Done();
 	void UpdateBoardPosition();
 	bool Finished() const;
-	const char* GameState() const;
+	void UpdateMove();
 	void OpenMenu();
 	void UpdateMenu();
 	void ProcessDialogs();
@@ -66,12 +66,13 @@ protected:
 	xUi::eBoard*	board;
 	xUi::eDialog*	piece_selector;
 	xUi::eDialog*	game_status;
+	xUi::eDialog*	move_status;
 	xUi::eDialog*	splash;
 	xUi::eDialog*	menu;
 
 	char move[6];
-	int	move_count;
-
+	char move_ai[6];
+	int move_count;
 	std::string moves;
 
 	enum eGameState { GS_NONE, GS_CHECK, GS_MATE, GS_STALEMATE, GS_DRAW };
@@ -79,7 +80,13 @@ protected:
 
 	enum eState { S_NONE, S_SPLASH0, S_SPLASH, S_INIT, S_GAME, S_QUIT };
 	eState state;
-	int start_time;
+	int timer;
+
+	enum eMoveState { MS_PLAYER, MS_AI_THINK, MS_AI_MOVE0, MS_AI_MOVE };
+	eMoveState move_state;
+	bool move_state_changed;
+	char stored_cursor[3];
+	void MoveState(eMoveState _ms);
 
 	enum eDifficulty { D_EASY, D_NORMAL, D_HARD };
 	eDifficulty difficulty;

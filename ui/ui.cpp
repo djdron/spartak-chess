@@ -122,9 +122,17 @@ void eFont::DrawText(eBufferRGBA& buf, const ePoint2& _pos, const char* text, co
 	ePoint2 pos(_pos);
 	while(*text)
 	{
-		DrawChar(buf, pos, *text, color);
+		if(*text == '\n')
+		{
+			pos.x = _pos.x;
+			pos.y += CHAR_H;
+		}
+		else
+		{
+			DrawChar(buf, pos, *text, color);
+			pos.x += CHAR_W;
+		}
 		++text;
-		pos.x += CHAR_W;
 	}
 }
 
