@@ -46,7 +46,7 @@ void eBoard::Position(const char* fen)
 	{
 		for(int i = 0; i < BOARD_DIM; ++i)
 		{
-			char p = -1;
+			signed char p = -1;
 			if(skip)
 				--skip;
 			if(!skip && *piece)
@@ -87,7 +87,7 @@ void eBoard::Selected(const char* pos)
 	strcpy(selected, pos);
 	flash = true;
 }
-char eBoard::Piece(const char* pos) const
+signed char eBoard::Piece(const char* pos) const
 {
 	if(!pos)
 		pos = selected;
@@ -97,7 +97,7 @@ char eBoard::Piece(const char* pos) const
 	int j = '8' - pos[1];
 	return position[ePoint2(i, j)];
 }
-void eBoard::DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, char piece)
+void eBoard::DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, signed char piece)
 {
 	ePoint2 cell_pos(0, 0);
 	if(black)
@@ -170,7 +170,7 @@ void eBoard::Paint(eBufferRGBA& buf)
 			cell_str[0] = 'a' + cell.x;
 			cell_str[1] = '8' - cell.y;
 			cell_str[2] = '\0';
-			char p = position[cell];
+			signed char p = position[cell];
 			bool black = (i + j) % 2 != 0;
 			eCellView view = CELL_NORMAL;
 			if(!strcmp(cell_str, selected))
