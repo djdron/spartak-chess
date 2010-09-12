@@ -31,6 +31,7 @@ const char* Resource(const char* _r);
 namespace xLog
 {
 bool Open();
+void Close();
 void LOG(const char* str);
 }
 //namespace xLog

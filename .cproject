@@ -27,6 +27,7 @@
 <option id="gnu.cpp.compiler.option.preprocessor.def.1549473319" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="NO_THREADS"/>
 <listOptionValue builtIn="false" value="USE_SDL1"/>
+<listOptionValue builtIn="false" value="USE_GLUT"/>
 <listOptionValue builtIn="false" value="_GLIBCXX_CONCEPT_CHECKS"/>
 <listOptionValue builtIn="false" value="_GLIBCXX_DEBUG"/>
 </option>
@@ -56,6 +57,9 @@
 </tool>
 </toolChain>
 </folderInfo>
+<sourceEntries>
+<entry excluding="build" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -523,6 +527,9 @@
 </tool>
 </toolChain>
 </folderInfo>
+<sourceEntries>
+<entry excluding="build" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>

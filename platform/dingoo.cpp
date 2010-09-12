@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 void* g_pGameDecodeBuf = NULL;
 static bool thread_finished = false;
 
-eGame* game = NULL;
+static eGame* game = NULL;
 
 enum eKeyBit
 {
