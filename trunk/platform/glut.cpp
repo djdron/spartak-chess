@@ -16,8 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DINGOO
-#ifndef USE_SDL
+#ifdef USE_GLUT
 
 #include <GL/glut.h>
 #include <ctype.h>
@@ -179,5 +178,4 @@ int main(int argc, char* argv[])
 	glutMainLoop();
 }
 
-#endif//USE_SDL
-#endif//_DINGOO
+#endif//USE_GLUT

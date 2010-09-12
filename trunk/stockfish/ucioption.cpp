@@ -106,11 +106,11 @@ namespace {
     o["Minimum Split Depth"] = Option(4, 4, 7);
     o["Maximum Number of Threads per Split Point"] = Option(5, 4, 8);
     o["Threads"] = Option(1, 1, MAX_THREADS);
-#ifdef _DINGOO
+#ifdef _MOBILE
     o["Hash"] = Option(4, 4, 16);
-#else//_DINGOO
+#else//_MOBILE
     o["Hash"] = Option(32, 4, 8192);
-#endif//_DINGOO
+#endif//_MOBILE
     o["Clear Hash"] = Option(false, BUTTON);
     o["New Game"] = Option(false, BUTTON);
     o["Ponder"] = Option(true);

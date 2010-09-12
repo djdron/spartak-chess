@@ -230,7 +230,7 @@ int cpu_count() {
   From Beowulf, from Olithink
 */
 #ifndef _WIN32
-#ifdef _DINGOO
+#ifdef _MOBILE
 
 int Bioskey()
 {
