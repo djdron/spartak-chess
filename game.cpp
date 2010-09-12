@@ -197,7 +197,7 @@ eGame::eApplyCellResult eGame::ApplyCell(const char* cell)
 	{
 	case 0:
 		{
-			char p = board->Piece(cell);
+			signed char p = board->Piece(cell);
 			if(p >= 0 && p <= 5 && MoveSide())
 				return AC_ERROR;
 			if(p >= 6 && p <= 11 && !MoveSide())

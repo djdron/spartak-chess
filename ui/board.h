@@ -35,7 +35,7 @@ public:
 	const char*	Cursor() { return cursor; }
 	void	Selected(const char* pos);
 	const char*	Selected() { return selected; }
-	char	Piece(const char* pos = NULL) const;
+	signed char Piece(const char* pos = NULL) const;
 	enum
 	{
 		PIECE_SIZE = 26, PIECES_W = PIECE_SIZE*6, PIECES_H = PIECE_SIZE*2,
@@ -47,7 +47,7 @@ public:
 	virtual bool Update();
 
 	enum eCellView { CELL_NORMAL, CELL_LIGHT, CELL_DARK };
-	void DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, char piece);
+	void DrawCell(eBufferRGBA& buf, const ePoint2& pos, bool black, eCellView view, signed char piece);
 	bool Flash() const { return flash; }
 
 	void Flip(bool _flip) { flip = _flip; Invalidate(); }
@@ -61,7 +61,7 @@ protected:
 	void	ResetTimer() { timer = Clock(); }
 	void 	Invalidate() { ResetTimer(); eDialog::Invalidate(); }
 protected:
-	eBuffer<char> position;
+	eBuffer<signed char> position;
 	char	cursor[3];
 	char	selected[3];
 	bool	flash;

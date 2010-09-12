@@ -45,31 +45,28 @@ template<class T> void SAFE_DELETE(T*& p) { if(p) { delete p; p = NULL; } }
 static const char* FileNameToCStr(const TFileName& n)
 {
 	static char buf[MAX_PATH_LEN];
-    TPtr8 ptr((TUint8*)buf, MAX_PATH_LEN);
-    CnvUtfConverter::ConvertFromUnicodeToUtf8(ptr, n);
-    ptr.SetLength(n.Length());
-    ptr.ZeroTerminate();
-    return buf;
+	TPtr8 ptr((TUint8*)buf, MAX_PATH_LEN);
+	CnvUtfConverter::ConvertFromUnicodeToUtf8(ptr, n);
+	ptr.SetLength(n.Length());
+	ptr.ZeroTerminate();
+	return buf;
 }
 
 void Init()
 {
-    TFileName appPath;
-    CEikonEnv::Static()->FsSession().PrivatePath(appPath);
-    appPath.Insert(0, CEikonEnv::Static()->EikAppUi()->Application()->AppFullName().Left(2));
-    const char* p = FileNameToCStr(appPath);
-    xIo::ResourcePath("e:\\spartak\\");
-    xLog::Open();
-    LOG(p);
-    LOG("\n");
-    LOG(xIo::Resource("res/splash.png"));
-    LOG("\n");
+	TFileName appPath;
+	CEikonEnv::Static()->FsSession().PrivatePath(appPath);
+	appPath.Insert(0, CEikonEnv::Static()->EikAppUi()->Application()->AppFullName().Left(2));
+	const char* p = FileNameToCStr(appPath);
+//	xIo::ResourcePath("e:\\spartak\\");
+//	xLog::Open();
+//	LOG(p);
     game = new eGame;
 }
 void Done()
 {
 	SAFE_DELETE(game);
-	xLog::Close();
+//	xLog::Close();
 }
 
 class TDCControl : public CCoeControl
@@ -128,7 +125,7 @@ void TDCControl::Draw(const TRect&) const
 	gc.Clear(r);
 	if(bitmap)
 	{
-		bool h = true;//r.Width() > r.Height();
+		bool h = r.Width() > r.Height();
 		Draw(h);
 		TRect rb(0, 0, h ? 320 : 240, h ? 240 : 320);
 		int dx = r.Width() - rb.Width();
@@ -197,7 +194,7 @@ TInt TDCControl::TimerCallBack( TAny* aInstance )
 }
 static char TranslateKey(const TKeyEvent& aKeyEvent)
 {
-	bool rotate = false;//op_rotate_joystick;
+	bool rotate = true;
     switch(aKeyEvent.iScanCode)
     {
     case '5':
