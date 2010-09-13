@@ -374,54 +374,66 @@ namespace {
   // calls think() (defined in search.cpp) with the appropriate
   // parameters. Returns false if a quit command is received while
   // thinking, returns true otherwise.
-
+  struct eGo
+  {
+  	eGo()
+  	{
+  		time[0] = time[1] = 0;
+  		inc[0] = inc[1] = 0;
+  		movesToGo = 0;
+  		depth = 0;
+  		nodes = 0;
+  		moveTime = 0;
+  		infinite = ponder = false;
+  		searchMoves[0] = MOVE_NONE;
+  	}
+	int time[2];
+	int inc[2];
+	int movesToGo, depth, nodes, moveTime;
+	bool infinite, ponder;
+	Move searchMoves[500];
+  };
   bool go(UCI_Command& uci) {
 
     string token;
 
-    int time[2] = {0, 0}, inc[2] = {0, 0};
-    int movesToGo = 0, depth = 0, nodes = 0, moveTime = 0;
-    bool infinite = false, ponder = false;
-    Move searchMoves[500];
-
-    searchMoves[0] = MOVE_NONE;
-
+    eHeapAlloc<eGo> go;
     while (uci >> token)
     {
         if (token == "infinite")
-            infinite = true;
+        	go->infinite = true;
         else if (token == "ponder")
-            ponder = true;
+        	go->ponder = true;
         else if (token == "wtime")
-            uci >> time[0];
+            uci >> go->time[0];
         else if (token == "btime")
-            uci >> time[1];
+            uci >> go->time[1];
         else if (token == "winc")
-            uci >> inc[0];
+            uci >> go->inc[0];
         else if (token == "binc")
-            uci >> inc[1];
+            uci >> go->inc[1];
         else if (token == "movestogo")
-            uci >> movesToGo;
+            uci >> go->movesToGo;
         else if (token == "depth")
-            uci >> depth;
+            uci >> go->depth;
         else if (token == "nodes")
-            uci >> nodes;
+            uci >> go->nodes;
         else if (token == "movetime")
-            uci >> moveTime;
+            uci >> go->moveTime;
         else if (token == "searchmoves")
         {
             int numOfMoves = 0;
             while (uci >> token)
-                searchMoves[numOfMoves++] = move_from_string(RootPosition, token);
+            	go->searchMoves[numOfMoves++] = move_from_string(RootPosition, token);
 
-            searchMoves[numOfMoves] = MOVE_NONE;
+            go->searchMoves[numOfMoves] = MOVE_NONE;
         }
     }
 
     assert(RootPosition.is_ok());
 
-    return think(uci, RootPosition, infinite, ponder, RootPosition.side_to_move(),
-                 time, inc, movesToGo, depth, nodes, moveTime, searchMoves);
+    return think(uci, RootPosition, go->infinite, go->ponder, RootPosition.side_to_move(),
+                 go->time, go->inc, go->movesToGo, go->depth, go->nodes, go->moveTime, go->searchMoves);
   }
 
   void perft(UCI_Command& uci) {

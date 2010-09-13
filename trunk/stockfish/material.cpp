@@ -32,8 +32,6 @@
 
 using namespace std;
 
-void LOG(const std::string& str);
-
 ////
 //// Local definitions
 ////

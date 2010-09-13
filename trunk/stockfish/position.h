@@ -68,7 +68,9 @@ const int MaxGameLength = 220;
 
 struct CheckInfo {
 
-    explicit CheckInfo(const Position&);
+    explicit CheckInfo(const Position& pos) { check(pos); }
+    CheckInfo() {}
+    void check(const Position&);
 
     Bitboard dcCandidates;
     Bitboard checkSq[8];

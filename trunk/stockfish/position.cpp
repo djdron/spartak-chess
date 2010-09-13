@@ -59,7 +59,7 @@ static bool RequestPending = false;
 
 /// Constructors
 
-CheckInfo::CheckInfo(const Position& pos) {
+void CheckInfo::check(const Position& pos) {
 
   Color us = pos.side_to_move();
   Color them = opposite_color(us);

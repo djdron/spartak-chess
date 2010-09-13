@@ -70,14 +70,17 @@ namespace {
 /// search captures, promotions and some checks) and about how important good
 /// move ordering is at the current node.
 
-MovePicker::MovePicker(const Position& p, Move ttm, Depth d, const History& h,
-                       SearchStack* ss, Value beta) : pos(p), H(h) {
+void MovePicker::pick(const Position& p, Move ttm, Depth d, const History& h,
+                       SearchStack* ss, Value beta)
+{
+	pos = &p;
+	H = &h;
   int searchTT = ttm;
   ttMoves[0].move = ttm;
   badCaptureThreshold = 0;
   lastBadCapture = badCaptures;
 
-  pinned = p.pinned_pieces(pos.side_to_move());
+  pinned = p.pinned_pieces(pos->side_to_move());
 
   if (ss && !p.is_check())
   {
@@ -108,7 +111,7 @@ MovePicker::MovePicker(const Position& p, Move ttm, Depth d, const History& h,
       // Skip TT move if is not a capture or a promotion, this avoids
       // qsearch tree explosion due to a possible perpetual check or
       // similar rare cases when TT table is full.
-      if (ttm != MOVE_NONE && !pos.move_is_capture_or_promotion(ttm))
+      if (ttm != MOVE_NONE && !pos->move_is_capture_or_promotion(ttm))
           searchTT = ttMoves[0].move = MOVE_NONE;
   }
 
@@ -132,7 +135,7 @@ void MovePicker::go_next_phase() {
       return;
 
   case PH_GOOD_CAPTURES:
-      lastMove = generate_captures(pos, moves);
+      lastMove = generate_captures(*pos, moves);
       score_captures();
       return;
 
@@ -142,7 +145,7 @@ void MovePicker::go_next_phase() {
       return;
 
   case PH_NONCAPTURES:
-      lastMove = generate_noncaptures(pos, moves);
+      lastMove = generate_noncaptures(*pos, moves);
       score_noncaptures();
       sort_moves(moves, lastMove, &lastGoodNonCapture);
       return;
@@ -155,18 +158,18 @@ void MovePicker::go_next_phase() {
       return;
 
   case PH_EVASIONS:
-      assert(pos.is_check());
-      lastMove = generate_evasions(pos, moves);
+      assert(pos->is_check());
+      lastMove = generate_evasions(*pos, moves);
       score_evasions_or_checks();
       return;
 
   case PH_QCAPTURES:
-      lastMove = generate_captures(pos, moves);
+      lastMove = generate_captures(*pos, moves);
       score_captures();
       return;
 
   case PH_QCHECKS:
-      lastMove = generate_non_capture_checks(pos, moves);
+      lastMove = generate_non_capture_checks(*pos, moves);
       score_evasions_or_checks();
       return;
 
@@ -209,8 +212,8 @@ void MovePicker::score_captures() {
       if (move_is_promotion(m))
           cur->score = QueenValueMidgame;
       else
-          cur->score =  pos.midgame_value_of_piece_on(move_to(m))
-                      - pos.type_of_piece_on(move_from(m));
+          cur->score =  pos->midgame_value_of_piece_on(move_to(m))
+                      - pos->type_of_piece_on(move_from(m));
   }
 }
 
@@ -228,15 +231,15 @@ void MovePicker::score_noncaptures() {
       m = cur->move;
       from = move_from(m);
       to = move_to(m);
-      piece = pos.piece_on(from);
-      hs = H.move_ordering_score(piece, to);
+      piece = pos->piece_on(from);
+      hs = H->move_ordering_score(piece, to);
 
       // Ensure history has always highest priority
       if (hs > 0)
           hs += 10000;
 
       // Gain table based scoring
-      cur->score = hs + 16 * H.gain(piece, to);
+      cur->score = hs + 16 * H->gain(piece, to);
   }
 }
 
@@ -255,13 +258,13 @@ void MovePicker::score_evasions_or_checks() {
   for (MoveStack* cur = moves; cur != lastMove; cur++)
   {
       m = cur->move;
-      if ((seeScore = pos.see_sign(m)) < 0)
+      if ((seeScore = pos->see_sign(m)) < 0)
           cur->score = seeScore - HistoryMax; // Be sure are at the bottom
-      else if (pos.move_is_capture(m))
-          cur->score =  pos.midgame_value_of_piece_on(move_to(m))
-                      - pos.type_of_piece_on(move_from(m)) + HistoryMax;
+      else if (pos->move_is_capture(m))
+          cur->score =  pos->midgame_value_of_piece_on(move_to(m))
+                      - pos->type_of_piece_on(move_from(m)) + HistoryMax;
       else
-          cur->score = H.move_ordering_score(pos.piece_on(move_from(m)), move_to(m));
+          cur->score = H->move_ordering_score(pos->piece_on(move_from(m)), move_to(m));
   }
 }
 
@@ -286,7 +289,7 @@ Move MovePicker::get_next_move() {
           case PH_TT_MOVES:
               move = (curMove++)->move;
               if (   move != MOVE_NONE
-                  && move_is_legal(pos, move, pinned))
+                  && move_is_legal(*pos, move, pinned))
                   return move;
               break;
 
@@ -294,10 +297,10 @@ Move MovePicker::get_next_move() {
               move = pick_best(curMove++, lastMove).move;
               if (   move != ttMoves[0].move
                   && move != ttMoves[1].move
-                  && pos.pl_move_is_legal(move, pinned))
+                  && pos->pl_move_is_legal(move, pinned))
               {
                   // Check for a non negative SEE now
-                  int seeValue = pos.see_sign(move);
+                  int seeValue = pos->see_sign(move);
                   if (seeValue >= badCaptureThreshold)
                       return move;
 
@@ -313,10 +316,10 @@ Move MovePicker::get_next_move() {
           case PH_KILLERS:
               move = (curMove++)->move;
               if (   move != MOVE_NONE
-                  && move_is_legal(pos, move, pinned)
+                  && move_is_legal(*pos, move, pinned)
                   && move != ttMoves[0].move
                   && move != ttMoves[1].move
-                  && !pos.move_is_capture(move))
+                  && !pos->move_is_capture(move))
                   return move;
               break;
 
@@ -331,7 +334,7 @@ Move MovePicker::get_next_move() {
                   && move != ttMoves[1].move
                   && move != killers[0].move
                   && move != killers[1].move
-                  && pos.pl_move_is_legal(move, pinned))
+                  && pos->pl_move_is_legal(move, pinned))
                   return move;
               break;
 
@@ -343,14 +346,14 @@ Move MovePicker::get_next_move() {
           case PH_QCAPTURES:
               move = pick_best(curMove++, lastMove).move;
               if (   move != ttMoves[0].move
-                  && pos.pl_move_is_legal(move, pinned))
+                  && pos->pl_move_is_legal(move, pinned))
                   return move;
               break;
 
           case PH_QCHECKS:
               move = (curMove++)->move;
               if (   move != ttMoves[0].move
-                  && pos.pl_move_is_legal(move, pinned))
+                  && pos->pl_move_is_legal(move, pinned))
                   return move;
               break;
 
