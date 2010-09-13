@@ -2,7 +2,7 @@
 &EN
 
 ;Header
-#{"Spartak Chess"}, (0xA89FAC38), 0, 0, 1,TYPE=SA
+#{"Spartak Chess"}, (0xA89FB850), 0, 0, 1,TYPE=SA
 
 ;Localised Vendor name
 %{"Vendor"}
@@ -19,11 +19,11 @@
 "dist\gcce\spartak-chess.rsc"		-"!:\resource\apps\spartak-chess.rsc"
 "dist\gcce\spartak-chess_reg.rsc"	-"!:\private\10003a3f\import\apps\spartak-chess_reg.rsc"
 "dist\gcce\spartak-chess.mbm"		-"!:\resource\apps\spartak-chess.mbm"
-"..\..\res\chess_board.png"			-"!:\private\A89FAC38\res\chess_board.png"
-"..\..\res\chess_pieces.png"		-"!:\private\A89FAC38\res\chess_pieces.png"
-"..\..\res\font_monospace_14.png"	-"!:\private\A89FAC38\res\font_monospace_14.png"
-"..\..\res\splash.png"				-"!:\private\A89FAC38\res\splash.png"
-"..\..\res\book\performance.bin"	-"!:\private\A89FAC38\res\book\performance.bin"
+"..\..\res\chess_board.png"			-"!:\private\A89FB850\res\chess_board.png"
+"..\..\res\chess_pieces.png"		-"!:\private\A89FB850\res\chess_pieces.png"
+"..\..\res\font_monospace_14.png"	-"!:\private\A89FB850\res\font_monospace_14.png"
+"..\..\res\splash.png"				-"!:\private\A89FB850\res\splash.png"
+"..\..\res\book\performance.bin"	-"!:\private\A89FB850\res\book\performance.bin"
 
 ;required for application to be covered by backup/restore facility 
-"br.xml"	-"!:\private\A89FAC38\backup_registration.xml"
+"br.xml"	-"!:\private\A89FB850\backup_registration.xml"

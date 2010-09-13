@@ -58,6 +58,7 @@ void Init()
 	CEikonEnv::Static()->FsSession().PrivatePath(appPath);
 	appPath.Insert(0, CEikonEnv::Static()->EikAppUi()->Application()->AppFullName().Left(2));
 	const char* p = FileNameToCStr(appPath);
+	xIo::ResourcePath(p);
 //	xIo::ResourcePath("e:\\spartak\\");
 //	xLog::Open();
 //	LOG(p);
@@ -297,7 +298,7 @@ class TApp : public CAknApplication
 {
 private:
 	CApaDocument* CreateDocumentL()	{ return new (ELeave) TDoc(*this); }
-	TUid AppDllUid() const { const TUid KUid = { 0xA89FAC38 }; return KUid; }
+	TUid AppDllUid() const { const TUid KUid = { 0xA89FB850 }; return KUid; }
 };
 
 LOCAL_C CApaApplication* NewApplication()
