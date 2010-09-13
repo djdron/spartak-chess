@@ -33,8 +33,6 @@
 #include "thread.h"
 #include "ucioption.h"
 
-void LOG(const std::string& str);
-
 ////
 //// Local definitions
 ////

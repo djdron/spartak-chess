@@ -44,12 +44,10 @@ struct SearchStack;
 /// In order to improve the efficiency of the alpha beta algorithm, MovePicker
 /// attempts to return the moves which are most likely to be strongest first.
 
-class MovePicker {
-
-  MovePicker& operator=(const MovePicker&); // silence a warning under MSVC
-
+class MovePicker
+{
 public:
-  MovePicker(const Position& p, Move ttm, Depth d, const History& h, SearchStack* ss = NULL, Value beta = -VALUE_INFINITE);
+  void pick(const Position& p, Move ttm, Depth d, const History& h, SearchStack* ss = NULL, Value beta = -VALUE_INFINITE);
   Move get_next_move();
   int number_of_evasions() const;
 
@@ -59,8 +57,8 @@ private:
   void score_evasions_or_checks();
   void go_next_phase();
 
-  const Position& pos;
-  const History& H;
+  const Position* pos;
+  const History* H;
   Bitboard pinned;
   MoveStack ttMoves[2], killers[2];
   int badCaptureThreshold, phase;

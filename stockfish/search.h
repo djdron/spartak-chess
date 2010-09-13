@@ -80,5 +80,14 @@ extern bool think(UCI_Command& uci, const Position &pos, bool infinite, bool pon
 extern int perft(Position &pos, Depth depth);
 extern int64_t nodes_searched();
 
+template<class T> struct eHeapAlloc
+{
+public:
+	  eHeapAlloc() : t(new T) {}
+	  ~eHeapAlloc() { delete t; }
+	  T* operator->() const { return t; }
+protected:
+	  T* t;
+};
 
 #endif // !defined(SEARCH_H_INCLUDED)
