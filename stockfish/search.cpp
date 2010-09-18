@@ -43,6 +43,10 @@
 #include "ucioption.h"
 #include "uci.h"
 
+#if defined(NO_THREADS)// && defined(_MOBILE)
+#define USE_ALLOC_BUFFERS
+#endif
+
 ////
 //// Local definitions
 ////
@@ -1085,6 +1089,11 @@ namespace {
   };
 
   // search<>() is the main search function for both PV and non-PV nodes
+#ifdef USE_ALLOC_BUFFERS
+  template<> uint8_t* eBufferAllocator<eSearchData>::buf = NULL;
+  template<> eSearchData* eBufferAllocator<eSearchData>::cur = NULL;
+  static eBufferAllocator<eSearchData> basd(PLY_MAX_PLUS_2);
+#endif
 
   template <NodeType PvNode>
   Value search(Position& pos, SearchStack* ss, Value alpha, Value beta, Depth depth, int ply) {
@@ -1095,7 +1104,11 @@ namespace {
     assert(ply > 0 && ply < PLY_MAX);
     assert(pos.thread() >= 0 && pos.thread() < TM.active_threads());
 
-    eHeapAlloc<eSearchData> sd;
+#ifdef USE_ALLOC_BUFFERS
+    eBufferAlloc<eSearchData> sd;
+#else
+    eStackAlloc<eSearchData> sd;
+#endif
     sd->mateThreat = false;
     sd->moveCount = 0;
     sd->threadID = pos.thread();
@@ -1514,6 +1527,12 @@ namespace {
 	CheckInfo ci;
   };
 
+#ifdef USE_ALLOC_BUFFERS
+  template<> uint8_t* eBufferAllocator<eQSearchData>::buf = NULL;
+  template<> eQSearchData* eBufferAllocator<eQSearchData>::cur = NULL;
+  static eBufferAllocator<eQSearchData> baqsd(PLY_MAX_PLUS_2);
+#endif
+
   template <NodeType PvNode>
   Value qsearch(Position& pos, SearchStack* ss, Value alpha, Value beta, Depth depth, int ply) {
 
@@ -1524,7 +1543,11 @@ namespace {
     assert(ply > 0 && ply < PLY_MAX);
     assert(pos.thread() >= 0 && pos.thread() < TM.active_threads());
 
-    eHeapAlloc<eQSearchData> qsd;
+#ifdef USE_ALLOC_BUFFERS
+    eBufferAlloc<eQSearchData> qsd;
+#else
+    eStackAlloc<eQSearchData> qsd;
+#endif
     qsd->oldAlpha = alpha;
 
     TM.incrementNodeCounter(pos.thread());

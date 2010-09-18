@@ -80,14 +80,41 @@ extern bool think(UCI_Command& uci, const Position &pos, bool infinite, bool pon
 extern int perft(Position &pos, Depth depth);
 extern int64_t nodes_searched();
 
+
+template<class T> struct eStackAlloc
+{
+public:
+	T* operator->() { return &t; }
+protected:
+	T t;
+};
+
 template<class T> struct eHeapAlloc
 {
 public:
-	  eHeapAlloc() : t(new T) {}
-	  ~eHeapAlloc() { delete t; }
-	  T* operator->() const { return t; }
+	eHeapAlloc() : t(new T) {}
+	~eHeapAlloc() { delete t; }
+	T* operator->() const { return t; }
 protected:
-	  T* t;
+	T* t;
+};
+
+template<class T> struct eBufferAllocator
+{
+	eBufferAllocator(int size) { buf = new uint8_t[size*sizeof(T)]; cur = (T*)buf; }
+	~eBufferAllocator() { delete[] buf; }
+	static uint8_t* buf;
+	static T* cur;
+};
+
+template<class T> struct eBufferAlloc
+{
+public:
+	eBufferAlloc() : t(new (eBufferAllocator<T>::cur++) T) {}
+	~eBufferAlloc() { t->~T(); --eBufferAllocator<T>::cur; }
+	T* operator->() const { return t; }
+protected:
+	T* t;
 };
 
 #endif // !defined(SEARCH_H_INCLUDED)
