@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <SDL.h>
 #include "../game.h"
 #include "../ui/dialog.h"
+#include "../io.h"
 
 static bool sdl_inited = false;
 static SDL_Surface* screen = NULL;
@@ -78,6 +79,7 @@ static void UpdateScreen(eGame* game)
 
 int main(int argc, char* argv[])
 {
+//	xLog::Open();
     if(!Init())
     {
 		Done();

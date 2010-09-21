@@ -154,8 +154,10 @@ public:
 
   // Constructors
   explicit Position(int threadID);
-  Position(const Position& pos, int threadID);
+  Position(const Position& pos, int threadID) { Create(pos, threadID); }
   Position(const std::string& fen, int threadID);
+
+  void Create(const Position& pos, int threadID);
 
   // Text input/output
   void from_fen(const std::string& fen);

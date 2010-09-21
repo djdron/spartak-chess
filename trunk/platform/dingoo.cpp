@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "../io.h"
 #include "../ui/dialog.h"
 
-#define USE_DINGOO_THREAD // use separate thread because we need more stack than default in .app (64K)
+//#define USE_DINGOO_THREAD // use separate thread because we need more stack than default in .app (64K)
 
 #ifdef USE_DINGOO_THREAD
 #include <dingoo/ucos2.h>
