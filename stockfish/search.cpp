@@ -614,17 +614,23 @@ namespace {
   // been consumed, the user stops the search, or the maximum search depth is
   // reached.
 
-  Value id_loop(UCI_Command& uci, const Position& pos, Move searchMoves[]) {
-
-//		LOG("id_loop0\n");
-    Position p(pos, pos.thread());
+struct eIdLoopData
+{
+	eIdLoopData() : p(-1), EasyMove(MOVE_NONE), alpha(-VALUE_INFINITE), beta(VALUE_INFINITE) {}
+    Position p;
     SearchStack ss[PLY_MAX_PLUS_2];
     Move pv[PLY_MAX_PLUS_2];
-    Move EasyMove = MOVE_NONE;
-    Value value, alpha = -VALUE_INFINITE, beta = VALUE_INFINITE;
+    Move EasyMove;
+    Value value, alpha, beta;
+};
 
+  Value id_loop(UCI_Command& uci, const Position& pos, Move searchMoves[]) {
+
+	  eHeapAlloc<eIdLoopData> idld;
+//		LOG("id_loop0\n");
+	  idld->p.Create(pos, pos.thread());
     // Moves to search are verified, copied, scored and sorted
-    RootMoveList rml(p, searchMoves);
+    RootMoveList rml(idld->p, searchMoves);
 
     // Handle special case of searching on a mate/stale position
     if (rml.move_count() == 0)
@@ -648,15 +654,15 @@ namespace {
     // Initialize
     TT.new_search();
     H.clear();
-    init_ss_array(ss, PLY_MAX_PLUS_2);
-    pv[0] = pv[1] = MOVE_NONE;
+    init_ss_array(idld->ss, PLY_MAX_PLUS_2);
+    idld->pv[0] = idld->pv[1] = MOVE_NONE;
     ValueByIteration[1] = rml.get_move_score(0);
     Iteration = 1;
 
     // Is one move significantly better than others after initial scoring ?
     if (   rml.move_count() == 1
         || rml.get_move_score(0) > rml.get_move_score(1) + EasyMoveMargin)
-        EasyMove = rml.get_move(0);
+    	idld->EasyMove = rml.get_move(0);
 
 //	LOG("id_loop1\n");
     // Iterative deepening loop
@@ -677,28 +683,28 @@ namespace {
             AspirationDelta = Max(abs(prevDelta1) + abs(prevDelta2) / 2, 16);
             AspirationDelta = (AspirationDelta + 7) / 8 * 8; // Round to match grainSize
 
-            alpha = Max(ValueByIteration[Iteration - 1] - AspirationDelta, -VALUE_INFINITE);
-            beta  = Min(ValueByIteration[Iteration - 1] + AspirationDelta,  VALUE_INFINITE);
+            idld->alpha = Max(ValueByIteration[Iteration - 1] - AspirationDelta, -VALUE_INFINITE);
+            idld->beta  = Min(ValueByIteration[Iteration - 1] + AspirationDelta,  VALUE_INFINITE);
         }
 
 //		LOG("id_loop2\n");
         // Search to the current depth, rml is updated and sorted, alpha and beta could change
-        value = root_search(uci, p, ss, pv, rml, &alpha, &beta);
+        idld->value = root_search(uci, idld->p, idld->ss, idld->pv, rml, &idld->alpha, &idld->beta);
 //		LOG("id_loop3\n");
 
         // Write PV to transposition table, in case the relevant entries have
         // been overwritten during the search.
-        TT.insert_pv(p, pv);
+        TT.insert_pv(idld->p, idld->pv);
 
         if (AbortSearch)
             break; // Value cannot be trusted. Break out immediately!
 
         //Save info about search result
-        ValueByIteration[Iteration] = value;
+        ValueByIteration[Iteration] = idld->value;
 
         // Drop the easy move if differs from the new best move
-        if (pv[0] != EasyMove)
-            EasyMove = MOVE_NONE;
+        if (idld->pv[0] != idld->EasyMove)
+        	idld->EasyMove = MOVE_NONE;
 
         if (UseTimeManagement)
         {
@@ -719,7 +725,7 @@ namespace {
             // Stop search early if one move seems to be much better than the others
             int64_t nodes = TM.nodes_searched();
             if (   Iteration >= 8
-                && EasyMove == pv[0]
+                && idld->EasyMove == idld->pv[0]
                 && (  (   rml.get_move_cumulative_nodes(0) > (nodes * 85) / 100
                        && current_search_time() > MaxSearchTime / 16)
                     ||(   rml.get_move_cumulative_nodes(0) > (nodes * 98) / 100
@@ -763,19 +769,19 @@ namespace {
              << " hashfull " << TT.full() << endl;
 
     // Print the best move and the ponder move to the standard output
-    if (pv[0] == MOVE_NONE)
+    if (idld->pv[0] == MOVE_NONE)
     {
-        pv[0] = rml.get_move(0);
-        pv[1] = MOVE_NONE;
+    	idld->pv[0] = rml.get_move(0);
+    	idld->pv[1] = MOVE_NONE;
     }
 
-    assert(pv[0] != MOVE_NONE);
+    assert(idld->pv[0] != MOVE_NONE);
 
-    uci << "bestmove " << pv[0];
+    uci << "bestmove " << idld->pv[0];
 
-    if (pv[1] != MOVE_NONE)
+    if (idld->pv[1] != MOVE_NONE)
     {
-        uci << " ponder " << pv[1];
+        uci << " ponder " << idld->pv[1];
     }
 
     uci << endl;

@@ -82,7 +82,7 @@ void CheckInfo::check(const Position& pos) {
 
 Position::Position(int th) : threadID(th) {}
 
-Position::Position(const Position& pos, int th) {
+void Position::Create(const Position& pos, int th) {
 
   memcpy(this, &pos, sizeof(Position));
   detach(); // Always detach() in copy c'tor to avoid surprises

@@ -33,6 +33,38 @@ void MenuUpdateItem(eDialog* m, const std::string& text, const std::string& id);
 }
 //namespace xUi
 
+namespace xStackMeasure
+{
+//#define USE_STACK_MEASURE
+#ifdef USE_STACK_MEASURE
+enum { FILL_KB = 512, FILL_B = FILL_KB*1024, FILL_BYTE = 123 };
+static byte* fill = NULL;
+void Begin()
+{
+	byte d[FILL_B];
+	memset(d, FILL_BYTE, FILL_B);
+	fill = d;
+}
+void End()
+{
+	byte* begin = fill;
+	byte* end = fill + FILL_B;
+	while(begin < end && *begin == FILL_BYTE)
+	{
+		++begin;
+	}
+	char buf[256];
+	sprintf(buf, "stack used: %ld\n", end - begin);
+	LOG(buf);
+}
+#else
+void Begin() {}
+void End() {}
+#endif//USE_STACK_MEASURE
+
+}
+//xStackMeasure
+
 eGame::eGame()
 	: desktop(NULL), board(NULL), piece_selector(NULL)
 	, game_status(NULL), move_status(NULL)
@@ -40,6 +72,7 @@ eGame::eGame()
 	, move_count(0), game_state(GS_NONE), state(S_NONE), timer(0)
 	, move_state(MS_PLAYER), move_state_changed(true), difficulty(D_EASY)
 {
+	xStackMeasure::Begin();
 	desktop = new xUi::eDesktop;
 	desktop->Create();
 }
@@ -47,6 +80,7 @@ eGame::eGame()
 eGame::~eGame()
 {
 	Done();
+	xStackMeasure::End();
 }
 
 void eGame::Init()

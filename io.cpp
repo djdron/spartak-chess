@@ -71,14 +71,16 @@ bool Open()
 
 void LOG(const string& str)
 {
-	if(xLog::log_file)
-		fputs(str.c_str(), xLog::log_file);
+	LOG(str.c_str());
 }
 
 void LOG(const char* str)
 {
 	if(xLog::log_file)
-		fputs(str, xLog::log_file);
+	{
+		fputs(str, log_file);
+		fflush(log_file);
+	}
 }
 
 }
