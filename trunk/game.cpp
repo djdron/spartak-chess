@@ -404,6 +404,7 @@ void eGame::UpdateMove()
 			strcpy(move_ai, r.substr(i, j - i).c_str());
 			char sel[3];
 			strncpy(sel, move_ai, 2);
+			sel[2] = '\0';
 			board->Selected(sel);
 			MoveState(MS_AI_MOVE0);
 			timer = Clock();
@@ -415,6 +416,7 @@ void eGame::UpdateMove()
 			Move(move_ai);
 			char sel[3];
 			strncpy(sel, move_ai + 2, 2);
+			sel[2] = '\0';
 			board->Selected(sel);
 			MoveState(MS_AI_MOVE);
 			timer = Clock();
