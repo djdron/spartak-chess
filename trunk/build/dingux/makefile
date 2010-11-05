@@ -10,7 +10,7 @@ RES_PATH = res
 
 SRCFOLDERS = . stockfish ui platform
 
-STD_OPTS  = -O3 -Wall -c -fmessage-length=0 -DNDEBUG -DNO_PREFETCH -DNO_THREADS -DUSE_SDL -D_MOBILE `sdl-config --cflags`
+STD_OPTS  = -O3 -Wall -c -fmessage-length=0 -DNDEBUG -DNO_PREFETCH -DNO_THREADS -DUSE_SDL -DSDL_KEYS_COMMON -D_MOBILE `sdl-config --cflags`
 CPP_OPTS  = $(STD_OPTS) -fno-rtti -fno-threadsafe-statics
 C_OPTS    = $(STD_OPTS)
 LD_OPTS   = `sdl-config --libs` -lpng

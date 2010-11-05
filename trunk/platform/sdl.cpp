@@ -29,7 +29,11 @@ static SDL_Surface* offscreen = NULL;
 
 static bool Init()
 {
+#ifdef SDL_USE_JOYSTICK
+    if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+#else//SDL_USE_JOYSTICK
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
+#endif//SDL_USE_JOYSTICK
         return false;
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_WM_SetCaption("Spartak Chess (Stockfish)", NULL);
@@ -77,6 +81,8 @@ static void UpdateScreen(eGame* game)
 	SDL_Flip(screen);
 }
 
+void ProcessEvent(eGame* game, const SDL_Event& e);
+
 int main(int argc, char* argv[])
 {
 //	xLog::Open();
@@ -92,24 +98,20 @@ int main(int argc, char* argv[])
     	SDL_Event e;
     	while(SDL_PollEvent(&e))
     	{
-			if(e.type == SDL_QUIT)
+    		switch(e.type)
+    		{
+    		case SDL_QUIT:
 				quit = true;
-			else if(e.type == SDL_KEYDOWN)
-			{
-				switch(e.key.keysym.sym)
-				{
-				case SDLK_LEFT:		game->Command('l');		break;
-				case SDLK_RIGHT:	game->Command('r');		break;
-				case SDLK_UP:		game->Command('u');		break;
-				case SDLK_DOWN:		game->Command('d');		break;
-				case SDLK_LCTRL:	game->Command('a');		break;
-				case SDLK_LALT:		game->Command('b');		break;
-				case SDLK_TAB:		game->Command('n');		break;
-				case SDLK_BACKSPACE:game->Command('g');		break;
-				case SDLK_ESCAPE:	game->Command('f');		break;
-				default: break;
-				}
-			}
+				break;
+    		case SDL_KEYDOWN:
+    		case SDL_KEYUP:
+#ifdef SDL_USE_JOYSTICK
+    		case SDL_SDL_JOYBUTTONDOWN:
+    		case SDL_SDL_JOYBUTTONUP:
+#endif//SDL_USE_JOYSTICK
+    			ProcessEvent(game, e);
+    			break;
+    		}
     	}
     	if(game->Update())
     	{
