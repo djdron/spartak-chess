@@ -27,14 +27,21 @@ static bool sdl_inited = false;
 static SDL_Surface* screen = NULL;
 static SDL_Surface* offscreen = NULL;
 
+#ifdef SDL_USE_JOYSTICK
+static SDL_Joystick* joy = NULL;
+#endif//SDL_USE_JOYSTICK
+
 static bool Init()
 {
 #ifdef SDL_USE_JOYSTICK
     if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+    	return false;
+    if(SDL_NumJoysticks() > 0)
+    	joy = SDL_JoystickOpen(0);
 #else//SDL_USE_JOYSTICK
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
-#endif//SDL_USE_JOYSTICK
         return false;
+#endif//SDL_USE_JOYSTICK
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_WM_SetCaption("Spartak Chess (Stockfish)", NULL);
     sdl_inited = true;
@@ -52,6 +59,10 @@ static bool Init()
 }
 static void Done()
 {
+#ifdef SDL_USE_JOYSTICK
+	if(joy)
+	    SDL_JoystickClose(joy);
+#endif//SDL_USE_JOYSTICK
 	if(offscreen)
 		SDL_FreeSurface(offscreen);
 	if(screen)
