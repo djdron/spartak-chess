@@ -26,7 +26,20 @@ void ProcessEvent(eGame* game, const SDL_Event& e)
 {
 	switch(e.type)
 	{
-	case SDL_SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONDOWN:
+		switch(e.jbutton.button)
+		{
+		case GP2X_BUTTON_LEFT:         game->Command('l');             break;
+		case GP2X_BUTTON_RIGHT:        game->Command('r');             break;
+		case GP2X_BUTTON_UP:           game->Command('u');             break;
+		case GP2X_BUTTON_DOWN:         game->Command('d');             break;
+		case GP2X_BUTTON_B:            game->Command('a');             break;
+		case GP2X_BUTTON_X:            game->Command('b');             break;
+		case GP2X_BUTTON_L:            game->Command('n');             break;
+		case GP2X_BUTTON_R:            game->Command('g');             break;
+		case GP2X_BUTTON_START:        game->Command('f');             break;
+		default: break;
+		}
 		break;
 	default:
 		break;
