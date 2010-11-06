@@ -48,6 +48,7 @@ static bool Init()
 	screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
 	if(!screen)
 		return false;
+	SDL_ShowCursor(SDL_DISABLE);
 	offscreen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16,
 						screen->format->Rmask,
 						screen->format->Gmask,
@@ -117,8 +118,8 @@ int main(int argc, char* argv[])
     		case SDL_KEYDOWN:
     		case SDL_KEYUP:
 #ifdef SDL_USE_JOYSTICK
-    		case SDL_SDL_JOYBUTTONDOWN:
-    		case SDL_SDL_JOYBUTTONUP:
+    		case SDL_JOYBUTTONDOWN:
+    		case SDL_JOYBUTTONUP:
 #endif//SDL_USE_JOYSTICK
     			ProcessEvent(game, e);
     			break;
