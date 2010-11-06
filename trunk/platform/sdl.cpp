@@ -34,20 +34,20 @@ static SDL_Joystick* joy = NULL;
 static bool Init()
 {
 #ifdef SDL_USE_JOYSTICK
-    if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
-    	return false;
-    if(SDL_NumJoysticks() > 0)
-    	joy = SDL_JoystickOpen(0);
+	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+		return false;
+	if(SDL_NumJoysticks() > 0)
+		joy = SDL_JoystickOpen(0);
 #else//SDL_USE_JOYSTICK
-    if(SDL_Init(SDL_INIT_VIDEO) < 0)
-        return false;
+	if(SDL_Init(SDL_INIT_VIDEO) < 0)
+		return false;
 #endif//SDL_USE_JOYSTICK
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_WM_SetCaption("Spartak Chess (Stockfish)", NULL);
-    sdl_inited = true;
-    screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
-    if(!screen)
-        return false;
+	sdl_inited = true;
+	screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
+	if(!screen)
+		return false;
 	offscreen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16,
 						screen->format->Rmask,
 						screen->format->Gmask,
@@ -55,7 +55,7 @@ static bool Init()
 						screen->format->Amask);
 	if(!offscreen)
 		return false;
-    return true;
+	return true;
 }
 static void Done()
 {
