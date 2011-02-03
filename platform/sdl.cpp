@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef USE_SDL
 
+#ifdef _CAANOO
+#include <SDL/SDL.h>
+#else
 #include <SDL.h>
+#endif
+
 #include "../game.h"
 #include "../ui/dialog.h"
 #include "../io.h"
@@ -118,6 +123,7 @@ int main(int argc, char* argv[])
     		case SDL_KEYDOWN:
     		case SDL_KEYUP:
 #ifdef SDL_USE_JOYSTICK
+			case SDL_JOYAXISMOTION:
     		case SDL_JOYBUTTONDOWN:
     		case SDL_JOYBUTTONUP:
 #endif//SDL_USE_JOYSTICK
